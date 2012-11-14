@@ -1,0 +1,95 @@
+// Este programa envia as leituras de temperatura a cada 60 s.
+// Este arquivo deve ser salvo com a extensão .ino
+
+#include <EtherCard.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#define ONE_WIRE_BUS 47 // Sensores conectados ao pino 47 do arduino
+// change these settings to match your own setup
+#define FEED    "xxxxx" // Número do seu "feed"
+#define APIKEY  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //Insira aqui a senha do seu "feed".
+float tempC;                                                   // Variable to hold temperature reading
+float tempH;
+long previousMillis = 0;
+
+OneWire oneWire(ONE_WIRE_BUS);                                      // Set up a oneWire instance to communicate with 1-wire devices
+DallasTemperature sensors(&oneWire);                                // Pass oneWire reference to Dallas Temperature
+
+DeviceAddress sensor_agua= { 0x28, 0x9C, 0xA9, 0xAA, 0x03, 0x00, 0x00, 0x44 }; //Altere este endereço para o correspondente ao seu sensor.
+DeviceAddress sensor_dissipador = { 0x28, 0xE1, 0x96, 0xAA, 0x03, 0x00, 0x00, 0x7D }; //Altere este endereço para o correspondente ao seu sensor.
+
+static byte mymac[6] = {0x54, 0x55, 0x58, 0x10, 0x00, 0x26}; // Este mac deve ser único na rede.
+
+char website[] PROGMEM = "api.cosm.com";
+
+byte Ethernet::buffer[500];
+Stash stash;
+
+
+void setup () 
+{
+  Serial.begin(57600);
+  sensors.begin();
+  sensors.setResolution(sensor_agua, 12);
+  sensors.setResolution(sensor_dissipador, 12);  // Set DS1820 thermometer to 12-bit resolution
+    
+    if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) 
+    {
+      Serial.println( "Failed to access Ethernet controller");
+    }
+    if (!ether.dhcpSetup())
+    {
+     Serial.println("DHCP failed");
+    }
+    if (!ether.dnsLookup(website))
+    Serial.println ("DNS failed");
+      
+  ether.printIp ("IP: ", ether.myip);
+  ether.printIp ("Mascara: ", ether.mymask);
+  ether.printIp ("Gateway: " , ether.gwip);
+  ether.printIp ("DNS: ", ether.dnsip);
+  ether.printIp("SRV: ", ether.hisip);
+}
+
+void cosm ()
+{
+ unsigned long currentMillis = millis();
+ 
+ if (currentMillis - previousMillis > 60000)    //Envia dados a cada 60 segundos.
+  {
+    previousMillis = currentMillis; 
+    sensors.requestTemperatures();             // Envia a solicitação de leitura.
+    tempC = (sensors.getTempC(sensor_agua));  //Lê a temperatura do sensor.
+    tempH = (sensors.getTempC(sensor_dissipador));   //Lê a temperatura do sensor.
+    
+    Serial.println("Sending...");
+    Serial.println (tempC);
+    Serial.println (tempH);
+    
+    byte sd = stash.create();
+    stash.print("Temperatura_da_água,");
+    stash.println(tempC,DEC);
+    stash.print("Temperatura_do_dissipador,");
+    stash.println(tempH,DEC);
+    stash.save();
+    
+    // generate the header with payload - note that the stash size is used,
+    // and that a "stash descriptor" is passed in as argument using "$H"
+    Stash::prepare(PSTR("PUT http://$F/v2/feeds/$F.csv HTTP/1.0" "\r\n"
+                        "Host: $F" "\r\n"
+                        "X-PachubeApiKey: $F" "\r\n"
+                        "Content-Length: $D" "\r\n"
+                        "\r\n"
+                        "$H"),
+            website, PSTR(FEED), website, PSTR(APIKEY), stash.size(), sd);
+
+    // send the packet - this also releases all stash buffers once done
+    ether.tcpSend();
+  }
+}
+
+void loop () 
+{
+  ether.packetLoop(ether.packetReceive());
+  cosm ();
+}

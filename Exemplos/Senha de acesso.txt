@@ -1,0 +1,261 @@
+//Este programa testa a solicitação de senha.
+// Este arquivo deve ser salvo com a extensão .ino
+
+#include <ITDB02_Graph16.h>
+#include <ITDB02_Touch.h>
+
+extern uint8_t BigFont[];     // Declare which fonts we will be using
+extern uint8_t SmallFont[];   // Declare which fonts we will be using
+#define LARGE true
+#define SMALL false
+
+ITDB02        myGLCD(38,39,40,41,1);   // Altere o aspecto se não estiver usando o ITDB02-3.2WC >>>>>>>>>>> (38,39,40,41,x) onde x é o modelo do LCD
+ITDB02_Touch  myTouch(6,5,4,3,2);
+int x, y;                  // Coordenadas da tela.
+
+char stCurrent[7]="";
+char limpar_senha[7] = "";
+int stCurrentLen=0;
+char senha [7] = {
+  '1','2','3','4','5','6','\0'}; // O carácter '\0' (null) não deve ser alterado.
+
+//Botões
+const int boT1[]= {
+  10, 20, 62, 60};        //Botao um
+const int boT2[]= {
+  72, 20, 124, 60};        //Botao dois
+const int boT3[]= {
+  134, 20, 186, 60};        //Botao tres
+const int boT4[]= {
+  196, 20, 248, 60};        //Botao quatro
+const int boT5[]= {
+  258, 20, 310, 60};        //Botao cinco
+const int boT6[]= {
+  10, 70, 62,110};        //Botao seis
+const int boT7[]= {
+  72, 70, 124, 110};        //Botao sete
+const int boT8[]= {
+  134, 70, 186, 110};       //Botao oito
+const int boT9[]= {
+  196, 70, 248, 110};        //Botao nove
+const int boT0[]= {
+  258, 70, 310, 110};        //Botao zero
+const int boTL[]= {
+  10, 120, 155, 160};        //Botao limpar
+const int boTE[]= {
+  165, 120, 310, 160};        //Botao entrar
+
+// Desenha um retângulo vermelho quando o botão é tocado.
+void waitForIt(int x1, int y1, int x2, int y2)
+{
+  myGLCD.setColor(255, 0, 0);
+  myGLCD.drawRoundRect (x1, y1, x2, y2);
+  while (myTouch.dataAvailable()) {
+    myTouch.read();
+  }
+  myGLCD.setColor(255, 255, 255);
+  myGLCD.drawRoundRect (x1, y1, x2, y2);
+}
+
+void printButton(char* text, int x1, int y1, int x2, int y2, boolean setFont = false)
+{
+  int stl = strlen(text);
+  int fx, fy;
+
+  myGLCD.setColor(0, 0, 200);
+  myGLCD.fillRoundRect (x1, y1, x2, y2);
+  myGLCD.setColor(255, 255, 255);
+  myGLCD.drawRoundRect (x1, y1, x2, y2);
+
+  myGLCD.setBackColor(0, 0, 200);
+  if (setFont) {
+    myGLCD.setFont(BigFont); 
+    fx = x1+(((x2 - x1+1)-(stl*16))/2);
+    fy = y1+(((y2 - y1+1)-16)/2);
+    myGLCD.print(text, fx, fy);
+  }
+  else {
+    myGLCD.setFont(SmallFont); 
+    fx = x1+(((x2 - x1)-(stl*8))/2);
+    fy = y1+(((y2 - y1-1)-8)/2);
+    myGLCD.print(text, fx, fy);
+  }
+}
+void printHeader(char* headline)
+{
+  setFont(SMALL, 255, 255, 0, 255, 255, 0);
+  myGLCD.fillRect (1, 1, 319, 14);
+  myGLCD.setColor(0, 0, 0);
+  myGLCD.print(headline, LEFT+5, 2);   
+}
+void setFont(boolean font, byte cr, byte cg, byte cb, byte br, byte bg, byte bb)
+{
+  myGLCD.setBackColor(br, bg, bb);    //font background black
+  myGLCD.setColor(cr, cg, cb);      //font colour white
+  if (font==LARGE)
+    myGLCD.setFont(BigFont);     //font size LARGE
+  else if (font==SMALL)
+    myGLCD.setFont(SmallFont);
+}
+
+//coloca a senha em uma string
+void updateStr(int val)
+{
+  stCurrent[stCurrentLen]=val;
+  stCurrent[stCurrentLen+1]='\0';
+  stCurrentLen++;
+  myGLCD.setFont(BigFont);
+  setFont(LARGE, 0, 255, 0, 0, 0, 0);
+  myGLCD.print(stCurrent, 110, 210);
+}
+
+void clearScreen()
+{
+  myGLCD.setColor(0, 0, 0);
+  myGLCD.fillRect(0, 0, 400, 240); 
+}
+
+void solicitar_senha()
+{
+  printHeader("DIGITE A SENHA");
+  printButton("1", boT1[0], boT1[1], boT1[2], boT1[3],true);
+  printButton("2", boT2[0], boT2[1], boT2[2], boT2[3],true);
+  printButton("3", boT3[0], boT3[1], boT3[2], boT3[3],true);
+  printButton("4", boT4[0], boT4[1], boT4[2], boT4[3],true);
+  printButton("5", boT5[0], boT5[1], boT5[2], boT5[3],true);
+  printButton("6", boT6[0], boT6[1], boT6[2], boT6[3],true);
+  printButton("7", boT7[0], boT7[1], boT7[2], boT7[3],true);
+  printButton("8", boT8[0], boT8[1], boT8[2], boT8[3],true);
+  printButton("9", boT9[0], boT9[1], boT9[2], boT9[3],true);
+  printButton("0", boT0[0], boT0[1], boT0[2], boT0[3],true);
+  printButton("LIMPAR", boTL[0], boTL[1], boTL[2], boTL[3],true);
+  printButton("ENTRAR", boTE[0], boTE[1], boTE[2], boTE[3],true);
+}
+void processMyTouch()
+{
+  myTouch.read();
+  x=myTouch.getX();
+  y=myTouch.getY();
+
+  if ((x>=boT1[0]) && (x<=boT1[2]) && (y>=boT1[1]) && (y<=boT1[3]))  // Botao: 1
+  {
+    waitForIt(boT1[0], boT1[1], boT1[2] ,boT1[3]);
+    updateStr('1');
+  }
+
+  if ((x>=boT2[0]) && (x<=boT2[2]) && (y>=boT2[1]) && (y<=boT2[3]))  // Botao: 2
+  {
+    waitForIt(boT2[0], boT2[1], boT2[2], boT2[3]);
+    updateStr('2');
+  }
+  if ((x>=boT3[0]) && (x<=boT3[2]) && (y>=boT3[1]) && (y<=boT3[3]))  // Botao: 3
+  {
+    waitForIt(boT3[0], boT3[1], boT3[2], boT3[3]);
+    updateStr('3');
+  }
+  if ((x>=boT4[0]) && (x<=boT4[2]) && (y>=boT4[1]) && (y<=boT4[3]))  // Botao: 4
+  {
+    waitForIt(boT4[0], boT4[1], boT4[2], boT4[3]);
+    updateStr('4');
+  }
+  if ((x>=boT5[0]) && (x<=boT5[2]) && (y>=boT5[1]) && (y<=boT5[3]))  // Botao: 5
+  {
+    waitForIt(boT5[0], boT5[1], boT5[2], boT5[3]);
+    updateStr('5');
+  }
+
+  if ((x>=boT6[0]) && (x<=boT6[2]) && (y>=boT6[1]) && (y<=boT6[3]))  // Botao: 6
+  {
+    waitForIt(boT6[0], boT6[1], boT6[2], boT6[3]);
+    updateStr('6');
+  }
+  if ((x>=boT7[0]) && (x<=boT7[2]) && (y>=boT7[1]) && (y<=boT7[3]))  // Botao: 7
+  {
+    waitForIt(boT7[0], boT7[1], boT7[2], boT7[3]);
+    updateStr('7');
+  }
+  if ((x>=boT8[0]) && (x<=boT8[2]) && (y>=boT8[1]) && (y<=boT8[3]))  // Botao: 8
+  {
+    waitForIt(boT8[0], boT8[1], boT8[2], boT8[3]);
+    updateStr('8');
+  }
+  if ((x>=boT9[0]) && (x<=boT9[2]) && (y>=boT9[1]) && (y<=boT9[3]))  // Botao: 9
+  {
+    waitForIt(boT9[0], boT9[1], boT9[2], boT9[3]);
+    updateStr('9');
+  }
+  if ((x>=boT0[0]) && (x<=boT0[2]) && (y>=boT0[1]) && (y<=boT0[3]))  // Botao: 0
+  {
+    waitForIt(boT0[0], boT0[1], boT0[2], boT0[3]);
+    updateStr('0');
+  }
+
+  if ((x>=boTL[0]) && (x<=boTL[2]) && (y>=boTL[1]) && (y<=boTL[3]))  // Botao: limpar
+  {
+    waitForIt(boTL[0], boTL[1], boTL[2], boTL[3]);
+    for (int i=0; i < 7;i++) stCurrent[i] = '\0';
+    stCurrentLen=0;
+  }
+  if ((x>=boTE[0]) && (x<=boTE[2]) && (y>=boTE[1]) && (y<=boTE[3]))  // Botao: entrar
+  {
+    waitForIt(boTE[0], boTE[1], boTE[2], boTE[3]);
+    if ((stCurrent[0] == senha [0]) && (stCurrent[1] == senha [1]) && (stCurrent[2] == senha [2]) && (stCurrent[3] == senha [3]) && (stCurrent[4] == senha [4]) && (stCurrent[5] == senha [5]))
+    {
+      stCurrentLen=0;
+      myGLCD.setFont(BigFont);
+      myGLCD.setColor(0, 255, 0);
+      myGLCD.setBackColor(0, 0, 0);
+      myGLCD.print("SENHA CORRETA", 51, 192);
+      delay(500);
+      myGLCD.print("              ", 51, 192);
+      delay(500);
+      myGLCD.print("SENHA CORRETA", 51, 192);
+      delay(500);
+      myGLCD.print("              ", 51, 192);
+      delay(500);
+      myGLCD.print("SENHA CORRETA", 51, 192);
+      delay(500);
+      myGLCD.print("              ", 51, 192);
+      memcpy(stCurrent, limpar_senha, sizeof(limpar_senha));
+      clearScreen();
+      solicitar_senha();
+    }
+
+    else
+    {
+      myGLCD.setFont(BigFont);
+      myGLCD.setColor(255, 0, 0);
+      myGLCD.setBackColor(0, 0, 0);
+      myGLCD.print("SENHA INCORRETA!", 35, 192);
+      delay(500);
+      myGLCD.print("                 ", 35, 192);
+      delay(500);            
+      myGLCD.print("SENHA INCORRETA!", 35, 192);
+      delay(500);
+      myGLCD.print("                 ", 35, 192);
+      delay(500);
+      myGLCD.print("SENHA INCORRETA!", 35, 192);
+      delay(500);
+      myGLCD.print("                ", 35, 192);
+      stCurrentLen=0;
+      memcpy(stCurrent, limpar_senha, sizeof(limpar_senha));
+      clearScreen();
+      solicitar_senha();
+    }
+  }
+}
+void setup()
+{
+  myGLCD.InitLCD(LANDSCAPE);
+  myGLCD.clrScr();
+  myTouch.InitTouch(LANDSCAPE);
+  myTouch.setPrecision(PREC_MEDIUM);
+  solicitar_senha();
+}
+void loop()
+{
+  if (myTouch.dataAvailable())  
+  { 
+    processMyTouch(); 
+  }
+}
