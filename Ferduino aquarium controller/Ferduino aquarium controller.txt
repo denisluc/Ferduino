@@ -2,6 +2,7 @@
 //Link para download da IDE com todas as bibliotecas necessárias.
 //https://skydrive.live.com/redir?resid=4F0958C6A216EC!401
 //Este arquivo deve ser salvo com extensão .ino
+//Na pasta onde estiver este arquivo deve conter o "template": "writeAnything.h"
 //---------------------------------------------------------
 //Meu Stilo v 2.3.8 Aquarium Controller>> Última atualização:12/09/2012 às 10:35 pelo horário de Brasília.
 //Este programa foi desenvolvido com base na versão Stilo 2.1
@@ -169,7 +170,7 @@ boolean PHAAflag = 0;          // Sinaliza que o PH do aquario esta fora do espe
 //*****************************************************************************************
 //************************ Variaveis de controle de densidade *****************************
 //*****************************************************************************************
-int DEN = 0;                  // Densidade
+int DEN = 1025;                  // Densidade
 int setDEN = 0;             // Densidade desejada
 int offDEN = 0;             // Variacao permitida da densidade
 int alarmDEN = 0;           // Variacao para acionar o alarme de densidade
@@ -381,6 +382,22 @@ char senha [7] = {
 //*****************************************************************************************
 //************************** Variaveis dosadoras ******************************************
 //*****************************************************************************************
+unsigned long millis_antes_1 = 0;
+unsigned long millis_antes_2 = 0;
+unsigned long millis_antes_3 = 0;
+int contador = 0;
+int hora01 = 0;
+int hora11 = 0;
+int minuto01 = 0;
+int minuto11 = 0;
+int hora02 = 0;
+int hora12 = 0;
+int minuto02 = 0;
+int minuto12 = 0;
+int hora03 = 0;
+int hora13 = 0;
+int minuto03 = 0;
+int minuto13 = 0;
 int deslocamento_botao_x = 155;
 int deslocamento_botao_y = 90;
 long tempo_dosagem_1 = 0;
@@ -578,12 +595,18 @@ byte tled[96];
 //**********************************************************************************************
 //*********************** Botoes dos menus *****************************************************
 //**********************************************************************************************
-const int temM[]= {90,35,115,60};           //temp. minus
-const int temP[]= {205,35,230,60};          //temp. plus
-const int offM[]= {90,85,115,110};          //offset minus
-const int offP[]= {205,85,230,110};         //offset plus
-const int almM[]= {90,135,115,160};         //alarm minus
-const int almP[]= {205,135,230,160};        //alarm plus
+const int temM[]= {
+  90,35,115,60};           //temp. minus
+const int temP[]= {
+  205,35,230,60};          //temp. plus
+const int offM[]= {
+  90,85,115,110};          //offset minus
+const int offP[]= {
+  205,85,230,110};         //offset plus
+const int almM[]= {
+  90,135,115,160};         //alarm minus
+const int almP[]= {
+  205,135,230,160};        //alarm plus
 const int iniC[]= {
   325,2,393,42};           // inicio
 const int menU[]= {
@@ -629,17 +652,24 @@ const int denS[]= {
 //const int []= {170, 70, 310, 110};         
 //const int []= {170, 120, 310, 160};        
 
-const int manU[]= {10, 20, 150, 60};        // Dosagem manual
-const int autO[]= {10, 70, 150, 110};       //Dosagem automatica
-const int perS[]= {10, 120, 150, 160};      //Dosagem personalizada
-const int reV[]= {10, 170, 150, 210};     // rever cofig. dosagem personalizada
+const int manU[]= {
+  10, 20, 150, 60};        // Dosagem manual
+const int autO[]= {
+  10, 70, 150, 110};       //Dosagem automatica
+const int perS[]= {
+  10, 120, 150, 160};      //Dosagem personalizada
+const int reV[]= {
+  10, 170, 150, 210};     // rever cofig. dosagem personalizada
 //const int []= {170, 20, 310, 60};       
 //const int []= {170, 70, 310, 110};         
 //const int []= {170, 120, 310, 160};          
 
-const int dosa1[]= {10, 20, 150, 60};       //Bomba dosadora 1
-const int dosa2[]= {10, 70, 150, 110};         //Bomba dosadora 2
-const int dosa3[]= {10, 120, 150, 160};      // Bomba dosadora 3
+const int dosa1[]= {
+  10, 20, 150, 60};       //Bomba dosadora 1
+const int dosa2[]= {
+  10, 70, 150, 110};         //Bomba dosadora 2
+const int dosa3[]= {
+  10, 120, 150, 160};      // Bomba dosadora 3
 //----------------------------------------------------
 const int leWB[]= {
   5, 188, 90, 220};        //LED values show whites or blues
@@ -681,8 +711,10 @@ const int segC[]= {
   250, 18, 275, 43};        //segundo para cima
 const int segB[]= {
   250, 69, 275, 92};        // segundo para baixo
-const int durC[]= {275, 18, 300, 43};        //duracao tpa para cima
-const int durB[]= {275, 69, 300, 92};        // duracao tpa para baixo
+const int durC[]= {
+  275, 18, 300, 43};        //duracao tpa para cima
+const int durB[]= {
+  275, 69, 300, 92};        // duracao tpa para baixo
 const int segU[]= {
   30, 99, 110, 139};       //segunda
 const int terC[]= {
@@ -695,7 +727,8 @@ const int sexT[]= {
   120, 146, 200, 186};      //sexta
 const int sabA[]= {
   210, 146, 290, 186};      //sabado
-const int domI[]= {120, 193, 200, 233};      //domingo
+const int domI[]= {
+  120, 193, 200, 233};      //domingo
 const int caliB[]= {
   170, 170, 310, 210};     // calibrar
 const int iniciaR[]= {
@@ -1310,7 +1343,7 @@ double MyNormalize(double v)
 byte validateDate(byte d, byte m, word y)
 {
   byte mArr[12] = {
-    31,0,31,30,31,30,31,31,30,31,30,31                };
+    31,0,31,30,31,30,31,31,30,31,30,31                              };
   byte od;
 
   if (m==2)
@@ -1350,7 +1383,7 @@ byte validateDate(byte d, byte m, word y)
 byte validateDateForMonth(byte d, byte m, word y)
 {
   byte mArr[12] = {
-    31,0,31,30,31,30,31,31,30,31,30,31                };
+    31,0,31,30,31,30,31,31,30,31,30,31                              };
   byte od;
   boolean dc=false;
 
@@ -1388,7 +1421,7 @@ byte calcDOW(byte d, byte m, int y)
 {
   int dow;
   byte mArr[12] = {
-    6,2,2,5,0,3,5,1,4,6,2,4                };
+    6,2,2,5,0,3,5,1,4,6,2,4                              };
 
   dow = (y % 100);
   dow = dow*1.25;
@@ -3059,37 +3092,37 @@ void calibrar_dosadoras(boolean refreshAll=false)
     myGLCD.print("PARA MELHORES RESULTADOS REPITA O TESTE", 5, 165);
     myGLCD.print("ALGUMAS VEZES E USE UMA MEDIA.", 35, 177);
   }
-    myGLCD.setColor(0, 0, 0);
-    myGLCD.fillRect(117, 135, 203, 160);
-    
-    if((modo_calibrar == true) && (dosadora_1_selecionada == true))
-    {
-      setFont(LARGE, 255, 255, 255, 0, 0, 0);
-      myGLCD.printNumF(fator_calib_dosadora_1_temp2,1, 130, 140);
-      setFont(SMALL, 255, 255, 255, 0, 0, 0);
-      myGLCD.print("DOSADORA 1 SELECIONADA", 80, 30);
-    }
+  myGLCD.setColor(0, 0, 0);
+  myGLCD.fillRect(117, 135, 203, 160);
 
-    if((modo_calibrar == true) && (dosadora_2_selecionada == true))
-    {
-      setFont(LARGE, 255, 255, 255, 0, 0, 0);
-      myGLCD.printNumF(fator_calib_dosadora_2_temp2,1, 130, 140);  
-      setFont(SMALL, 255, 255, 255, 0, 0, 0);
-      myGLCD.print("DOSADORA 2 SELECIONADA", 80, 30);
-    }
+  if((modo_calibrar == true) && (dosadora_1_selecionada == true))
+  {
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+    myGLCD.printNumF(fator_calib_dosadora_1_temp2,1, 130, 140);
+    setFont(SMALL, 255, 255, 255, 0, 0, 0);
+    myGLCD.print("DOSADORA 1 SELECIONADA", 80, 30);
+  }
 
-    if((modo_calibrar == true) && (dosadora_3_selecionada == true))
-    {
-      setFont(LARGE, 255, 255, 255, 0, 0, 0);
-      myGLCD.printNumF(fator_calib_dosadora_3_temp2,1, 130, 140);
-      setFont(SMALL, 255, 255, 255, 0, 0, 0);
-      myGLCD.print("DOSADORA 3 SELECIONADA", 80, 30);
-    } 
+  if((modo_calibrar == true) && (dosadora_2_selecionada == true))
+  {
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+    myGLCD.printNumF(fator_calib_dosadora_2_temp2,1, 130, 140);  
+    setFont(SMALL, 255, 255, 255, 0, 0, 0);
+    myGLCD.print("DOSADORA 2 SELECIONADA", 80, 30);
+  }
+
+  if((modo_calibrar == true) && (dosadora_3_selecionada == true))
+  {
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+    myGLCD.printNumF(fator_calib_dosadora_3_temp2,1, 130, 140);
+    setFont(SMALL, 255, 255, 255, 0, 0, 0);
+    myGLCD.print("DOSADORA 3 SELECIONADA", 80, 30);
+  } 
 }
 
 void config_dosagem_manual(boolean refreshAll=false) // ----------tela =27
 {
-    if(refreshAll)
+  if(refreshAll)
   {
     printHeader("DOSAGEM MANUAL");
     printButton("INICIO", iniC[0], iniC[1], iniC[2], iniC[3]);
@@ -3105,37 +3138,37 @@ void config_dosagem_manual(boolean refreshAll=false) // ----------tela =27
     myGLCD.print("EM SEGUIDA TOQUE EM INICIAR.", 30, 85);
     myGLCD.print("A DOSAGEM INICIARA EM 10 SEGUNDOS", 30, 100);
   }
-    myGLCD.setColor(0, 0, 0);
-    myGLCD.fillRect(117, 135, 203, 160);
-    
-    if((modo_manual == true) && (dosadora_1_selecionada == true))
-    {
-      setFont(LARGE, 255, 255, 255, 0, 0, 0);
-      myGLCD.printNumF(dose_dosadora_1_manual,1, 130, 140);
-      setFont(SMALL, 255, 255, 255, 0, 0, 0);
-      myGLCD.print("DOSADORA 1 SELECIONADA", 80, 30);
-    }
+  myGLCD.setColor(0, 0, 0);
+  myGLCD.fillRect(117, 135, 203, 160);
 
-    if((modo_manual == true) && (dosadora_2_selecionada == true))
-    {
-      setFont(LARGE, 255, 255, 255, 0, 0, 0);
-      myGLCD.printNumF(dose_dosadora_2_manual,1, 130, 140);  
-      setFont(SMALL, 255, 255, 255, 0, 0, 0);
-      myGLCD.print("DOSADORA 2 SELECIONADA", 80, 30);
-    }
+  if((modo_manual == true) && (dosadora_1_selecionada == true))
+  {
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+    myGLCD.printNumF(dose_dosadora_1_manual,1, 130, 140);
+    setFont(SMALL, 255, 255, 255, 0, 0, 0);
+    myGLCD.print("DOSADORA 1 SELECIONADA", 80, 30);
+  }
 
-    if((modo_manual == true) && (dosadora_3_selecionada == true))
-    {
-      setFont(LARGE, 255, 255, 255, 0, 0, 0);
-      myGLCD.printNumF(dose_dosadora_3_manual,1, 130, 140);
-      setFont(SMALL, 255, 255, 255, 0, 0, 0);
-      myGLCD.print("DOSADORA 3 SELECIONADA", 80, 30);
-    } 
+  if((modo_manual == true) && (dosadora_2_selecionada == true))
+  {
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+    myGLCD.printNumF(dose_dosadora_2_manual,1, 130, 140);  
+    setFont(SMALL, 255, 255, 255, 0, 0, 0);
+    myGLCD.print("DOSADORA 2 SELECIONADA", 80, 30);
+  }
+
+  if((modo_manual == true) && (dosadora_3_selecionada == true))
+  {
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+    myGLCD.printNumF(dose_dosadora_3_manual,1, 130, 140);
+    setFont(SMALL, 255, 255, 255, 0, 0, 0);
+    myGLCD.print("DOSADORA 3 SELECIONADA", 80, 30);
+  } 
 }
 
 void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
 {
-    if(refreshAll)
+  if(refreshAll)
   { 
     hora_inicial_dosagem_automatica_1_temp2 = hora_inicial_dosagem_automatica_1;
     minuto_inicial_dosagem_automatica_1_temp2 = minuto_inicial_dosagem_automatica_1;
@@ -3145,10 +3178,10 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
     minuto_inicial_dosagem_automatica_2_temp2 = minuto_inicial_dosagem_automatica_2;
     hora_final_dosagem_automatica_2_temp2 = hora_final_dosagem_automatica_2;
     minuto_final_dosagem_automatica_2_temp2 = minuto_final_dosagem_automatica_2;
-    hora_inicial_dosagem_automatica_3_temp2 = hora_inicial_dosagem_automatica_2;
-    minuto_inicial_dosagem_automatica_3_temp2 = minuto_inicial_dosagem_automatica_2;
-    hora_final_dosagem_automatica_3_temp2 = hora_final_dosagem_automatica_2;
-    minuto_final_dosagem_automatica_3_temp2 = minuto_final_dosagem_automatica_2;
+    hora_inicial_dosagem_automatica_3_temp2 = hora_inicial_dosagem_automatica_3;
+    minuto_inicial_dosagem_automatica_3_temp2 = minuto_inicial_dosagem_automatica_3;
+    hora_final_dosagem_automatica_3_temp2 = hora_final_dosagem_automatica_3;
+    minuto_final_dosagem_automatica_3_temp2 = minuto_final_dosagem_automatica_3;
     dose_dosadora_1_automatica_temp2 = dose_dosadora_1_automatica;
     dose_dosadora_2_automatica_temp2 = dose_dosadora_2_automatica;
     dose_dosadora_3_automatica_temp2 = dose_dosadora_3_automatica;
@@ -3173,11 +3206,11 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
   printButton("-", minDT[0], minDT[1]+deslocamento_botao_y, minDT[2], minDT[3]+deslocamento_botao_y, true); //min down
   printButton("+", durC[0], durC[1]+deslocamento_botao_y, durC[2], durC[3]+deslocamento_botao_y, true); //minuto mais
   printButton("-", durB[0], durB[1]+deslocamento_botao_y, durB[2], durB[3]+deslocamento_botao_y, true); //minuto menos
-  
+
   printButton("INICIO", iniC[0], iniC[1], iniC[2], iniC[3]);
   printButton("VOLTAR", volT[0], volT[1], volT[2], volT[3]);
   printButton("SALVAR", salV[0], salV[1], salV[2], salV[3]);
-  
+
   setFont(LARGE, 255, 255, 255, 0, 0, 0);
   myGLCD.print(":", 105, 48);
   myGLCD.print(":", 105 + deslocamento_botao_x, 48);
@@ -3191,7 +3224,7 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
   myGLCD.print("DE DOSES:", 190, 61 + deslocamento_botao_y);
 
   if(dosadora_1_selecionada == true)
-{
+  {
     setFont(LARGE, 255, 255, 255, 0, 0, 0);
     if (hora_inicial_dosagem_automatica_1_temp2 < 10) {
       myGLCD.printNumI(0, 70, 48);
@@ -3225,9 +3258,9 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
     }
 
     setFont(LARGE, 255, 255, 255, 0, 0, 0);
-    
+
     myGLCD.printNumF(dose_dosadora_1_automatica_temp2, 1, 100, 48 + deslocamento_botao_y);
-    
+
     if (quantidade_dose_dosadora_1_automatica_temp2 < 10) 
     {
       myGLCD.printNumI(0, 275, 48 + deslocamento_botao_y);
@@ -3253,7 +3286,7 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
   if(dosadora_2_selecionada == true)
   {
     setFont(LARGE, 255, 255, 255, 0, 0, 0);
-    
+
     if (hora_inicial_dosagem_automatica_2_temp2 < 10) {
       myGLCD.printNumI(0, 70, 48);
       myGLCD.printNumI(hora_inicial_dosagem_automatica_2_temp2, 86, 48);
@@ -3284,10 +3317,10 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
     else {
       myGLCD.printNumI(minuto_final_dosagem_automatica_2_temp2, 120 + deslocamento_botao_x, 48);
     }
-        setFont(LARGE, 255, 255, 255, 0, 0, 0);
-    
+    setFont(LARGE, 255, 255, 255, 0, 0, 0);
+
     myGLCD.printNumF(dose_dosadora_2_automatica_temp2, 1, 100, 48 + deslocamento_botao_y);
-    
+
     if (quantidade_dose_dosadora_2_automatica_temp2 < 10) 
     {
       myGLCD.printNumI(0, 275, 48 + deslocamento_botao_y);
@@ -3310,44 +3343,44 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
       printButton("OFF", domI[0], domI[1], domI[2], domI[3]); 
     }
   }
-  if(dosadora_3_selecionada ==true)
+  if(dosadora_3_selecionada == true)
   {
-
     setFont(LARGE, 255, 255, 255, 0, 0, 0);
+
     if (hora_inicial_dosagem_automatica_3_temp2 < 10) {
       myGLCD.printNumI(0, 70, 48);
-      myGLCD.printNumI(hora_inicial_dosagem_automatica_3_temp2, 86, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(hora_inicial_dosagem_automatica_3_temp2, 86, 48);
     } 
     else {
-      myGLCD.printNumI(hora_inicial_dosagem_automatica_3_temp2, 70, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(hora_inicial_dosagem_automatica_3_temp2, 70, 48);
     }
 
     if (minuto_inicial_dosagem_automatica_3_temp2 < 10) {
-      myGLCD.printNumI(0, 120, 48 + deslocamento_botao_y);
-      myGLCD.printNumI(minuto_inicial_dosagem_automatica_3_temp2, 136, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(0, 120, 48);
+      myGLCD.printNumI(minuto_inicial_dosagem_automatica_3_temp2, 136, 48);
     } 
     else {
-      myGLCD.printNumI(minuto_inicial_dosagem_automatica_3_temp2, 120, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(minuto_inicial_dosagem_automatica_3_temp2, 120, 48);
     }
     if (hora_final_dosagem_automatica_3_temp2 < 10) {
-      myGLCD.printNumI(0, 70 + deslocamento_botao_x, 48 + deslocamento_botao_y);
-      myGLCD.printNumI(hora_final_dosagem_automatica_3_temp2, 86 + deslocamento_botao_x, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(0, 70 + deslocamento_botao_x, 48);
+      myGLCD.printNumI(hora_final_dosagem_automatica_3_temp2, 86 + deslocamento_botao_x, 48);
     } 
     else {
-      myGLCD.printNumI(hora_final_dosagem_automatica_3_temp2, 70 + deslocamento_botao_x, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(hora_final_dosagem_automatica_3_temp2, 70 + deslocamento_botao_x, 48);
     }
 
     if (minuto_final_dosagem_automatica_3_temp2 < 10) {
-      myGLCD.printNumI(0, 120 + deslocamento_botao_x, 48 + deslocamento_botao_y);
-      myGLCD.printNumI(minuto_final_dosagem_automatica_3_temp2, 136 + deslocamento_botao_x, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(0, 120 + deslocamento_botao_x, 48);
+      myGLCD.printNumI(minuto_final_dosagem_automatica_3_temp2, 136 + deslocamento_botao_x, 48);
     } 
     else {
-      myGLCD.printNumI(minuto_final_dosagem_automatica_3_temp2, 120 + deslocamento_botao_x, 48 + deslocamento_botao_y);
+      myGLCD.printNumI(minuto_final_dosagem_automatica_3_temp2, 120 + deslocamento_botao_x, 48);
     }
     setFont(LARGE, 255, 255, 255, 0, 0, 0);
-    
+
     myGLCD.printNumF(dose_dosadora_3_automatica_temp2, 1, 100, 48 + deslocamento_botao_y);
-    
+
     if (quantidade_dose_dosadora_3_automatica_temp2 < 10) 
     {
       myGLCD.printNumI(0, 275, 48 + deslocamento_botao_y);
@@ -3369,10 +3402,9 @@ void config_dosagem_automatica(boolean refreshAll=false) // ----------tela =28
     {
       printButton("OFF", domI[0], domI[1], domI[2], domI[3]); 
     }
-  }
-  
- myGLCD.setColor(0, 0, 0);                      
- myGLCD.fillRect(205, 195, 310, 239);
+  }  
+  myGLCD.setColor(0, 0, 0);                      
+  myGLCD.fillRect(205, 195, 310, 239);
 }
 
 void config_dosagem_personalizada(boolean refreshAll=false) // ----------tela =29
@@ -3442,7 +3474,7 @@ void config_dosagem_personalizada(boolean refreshAll=false) // ----------tela =2
     setFont(SMALL, 255, 255, 255, 0, 0, 0);
     myGLCD.print("DOSADORA 1", 10, 198);
     myGLCD.print("SELECIONADA", 10, 218);
-    
+
     if (temp2segunda_dosagem_personalizada_1 == 1) {
       printButton_verde("SEGUNDA", segU[0], segU[1], segU[2], segU[3]); //botao segunda
     } 
@@ -3596,7 +3628,7 @@ void config_dosagem_personalizada(boolean refreshAll=false) // ----------tela =2
     setFont(SMALL, 255, 255, 255, 0, 0, 0);
     myGLCD.print("DOSADORA 3", 10, 198);
     myGLCD.print("SELECIONADA", 10, 218);
-    
+
     if (temp2segunda_dosagem_personalizada_3 == 1) {
       printButton_verde("SEGUNDA", segU[0], segU[1], segU[2], segU[3]); //botao segunda
     } 
@@ -3798,374 +3830,374 @@ void config_dosagem_personalizada_2(boolean refreshAll=false) // ----------tela 
 
 void rever_dosagem_personalizada() // ----------tela =32
 {
-  
-    printHeader("REVER CONF. DA DOSAGEM PERSONALIZADA");
-    printButton("INICIO", iniC[0], iniC[1], iniC[2], iniC[3]);
-    printButton("MENU", menU[0], menU[1], menU[2], menU[3]);
 
-    myGLCD.setColor(161, 127, 73);                    
-    myGLCD.drawLine(1, 88, 319, 88);  
-    myGLCD.drawLine(1, 158, 319, 158);
-    myGLCD.drawLine(319, 15, 319, 239);
-    
-    setFont(SMALL, 255, 255, 255, 0, 0, 0);
-    myGLCD.print("DOSADORA 1:", 10, 30);   
-    myGLCD.print("INICIAL:", 10, 50);  
-    myGLCD.print("FINAL:", 118, 50);
-    myGLCD.print("QUANTIDADE DE DOSES:", 10, 70);
-    myGLCD.print("VOLUME:", 215, 50);    //Posição correta
-    myGLCD.print(":", 90, 50);
-    myGLCD.print(":", 180, 50);
-  
-    myGLCD.printNumF(dose_dosadora_1_personalizada, 1, 275, 50); //Posição correta
-    myGLCD.printNumI(quantidade_dose_dosadora_1_personalizada, 170, 70);
-    
-    if(hora_inicial_dosagem_personalizada_1 < 10)
-    {
-      myGLCD.printNumI(0, 72, 50);
-      myGLCD.printNumI(hora_inicial_dosagem_personalizada_1, 80, 50);
-    }
-    else
-    {
+  printHeader("REVER CONF. DA DOSAGEM PERSONALIZADA");
+  printButton("INICIO", iniC[0], iniC[1], iniC[2], iniC[3]);
+  printButton("MENU", menU[0], menU[1], menU[2], menU[3]);
+
+  myGLCD.setColor(161, 127, 73);                    
+  myGLCD.drawLine(1, 88, 319, 88);  
+  myGLCD.drawLine(1, 158, 319, 158);
+  myGLCD.drawLine(319, 15, 319, 239);
+
+  setFont(SMALL, 255, 255, 255, 0, 0, 0);
+  myGLCD.print("DOSADORA 1:", 10, 30);   
+  myGLCD.print("INICIAL:", 10, 50);  
+  myGLCD.print("FINAL:", 118, 50);
+  myGLCD.print("QUANTIDADE DE DOSES:", 10, 70);
+  myGLCD.print("VOLUME:", 215, 50);    //Posição correta
+  myGLCD.print(":", 90, 50);
+  myGLCD.print(":", 180, 50);
+
+  myGLCD.printNumF(dose_dosadora_1_personalizada, 1, 275, 50); //Posição correta
+  myGLCD.printNumI(quantidade_dose_dosadora_1_personalizada, 170, 70);
+
+  if(hora_inicial_dosagem_personalizada_1 < 10)
+  {
+    myGLCD.printNumI(0, 72, 50);
+    myGLCD.printNumI(hora_inicial_dosagem_personalizada_1, 80, 50);
+  }
+  else
+  {
     myGLCD.printNumI(hora_inicial_dosagem_personalizada_1, 72, 50);
-    }
-    if(minuto_inicial_dosagem_personalizada_1 < 10)
-    {
-      myGLCD.printNumI(0, 98, 50);
-      myGLCD.printNumI(minuto_inicial_dosagem_personalizada_1, 106, 50);
-    }
-    else
-    {
+  }
+  if(minuto_inicial_dosagem_personalizada_1 < 10)
+  {
+    myGLCD.printNumI(0, 98, 50);
+    myGLCD.printNumI(minuto_inicial_dosagem_personalizada_1, 106, 50);
+  }
+  else
+  {
     myGLCD.printNumI(minuto_inicial_dosagem_personalizada_1, 98, 50);
-    }
-    if(hora_final_dosagem_personalizada_1 < 10)
-    {
-      myGLCD.printNumI(0, 165, 50);
-      myGLCD.printNumI(hora_final_dosagem_personalizada_1, 173, 50); 
-    }
-    else
-    {
+  }
+  if(hora_final_dosagem_personalizada_1 < 10)
+  {
+    myGLCD.printNumI(0, 165, 50);
+    myGLCD.printNumI(hora_final_dosagem_personalizada_1, 173, 50); 
+  }
+  else
+  {
     myGLCD.printNumI(hora_final_dosagem_personalizada_1, 165, 50);
-    }
-    if(minuto_final_dosagem_personalizada_1 < 10)
-    {
-      myGLCD.printNumI(0, 188, 50);
-      myGLCD.printNumI(minuto_final_dosagem_personalizada_1, 196, 50);
-    }
-    else
-    {
+  }
+  if(minuto_final_dosagem_personalizada_1 < 10)
+  {
+    myGLCD.printNumI(0, 188, 50);
+    myGLCD.printNumI(minuto_final_dosagem_personalizada_1, 196, 50);
+  }
+  else
+  {
     myGLCD.printNumI(minuto_final_dosagem_personalizada_1, 188, 50);
-    }
-    if(segunda_dosagem_personalizada_1 == 1)
-    {
+  }
+  if(segunda_dosagem_personalizada_1 == 1)
+  {
     printButton_verde("S", 110, 23, 130, 43);
-    }
-    else
-    {
-      printButton("S", 110, 23, 130, 43);
-    }
-    if(terca_dosagem_personalizada_1 == 2)
-    {
+  }
+  else
+  {
+    printButton("S", 110, 23, 130, 43);
+  }
+  if(terca_dosagem_personalizada_1 == 2)
+  {
     printButton_verde("T", 140, 23, 160, 43);
-    }
-    else
-    {
-      printButton("T", 140, 23, 160, 43);
-    }
-    if(quarta_dosagem_personalizada_1 == 3)
-    {
+  }
+  else
+  {
+    printButton("T", 140, 23, 160, 43);
+  }
+  if(quarta_dosagem_personalizada_1 == 3)
+  {
     printButton_verde("Q", 170, 23, 190, 43);
-    }
-    else
-    {
-      printButton("Q", 170, 23, 190, 43);
-    }    
-    if(quinta_dosagem_personalizada_1 == 4)
-    {
+  }
+  else
+  {
+    printButton("Q", 170, 23, 190, 43);
+  }    
+  if(quinta_dosagem_personalizada_1 == 4)
+  {
     printButton_verde("Q", 200, 23, 220, 43);
-    }
-    else
-    {
-      printButton("Q", 200, 23, 220, 43);
-    }    
-    if(sexta_dosagem_personalizada_1 == 5)
-    {
+  }
+  else
+  {
+    printButton("Q", 200, 23, 220, 43);
+  }    
+  if(sexta_dosagem_personalizada_1 == 5)
+  {
     printButton_verde("S", 230, 23, 250, 43);
-    }
-    else
-    {
-      printButton("S", 230, 23, 250, 43);
-    }
-    if(sabado_dosagem_personalizada_1 == 6)
-    {
+  }
+  else
+  {
+    printButton("S", 230, 23, 250, 43);
+  }
+  if(sabado_dosagem_personalizada_1 == 6)
+  {
     printButton_verde("S", 260, 23, 280, 43);
-    }
-    else
-    {
-      printButton("S", 260, 23, 280, 43);
-    }
-    if(sabado_dosagem_personalizada_1 == 7)
-    {
+  }
+  else
+  {
+    printButton("S", 260, 23, 280, 43);
+  }
+  if(sabado_dosagem_personalizada_1 == 7)
+  {
     printButton_verde("D", 290, 23, 310, 43);
-    }
-    else
-    {
-      printButton("D", 290, 23, 310, 43);
-    } 
-    if (modo_personalizado_on_1 == 1) 
-    {
-      printButton_verde("ON", 200, 65, 245, 85); 
-    } 
-    else 
-    {
-      printButton("ON", 200, 65, 245, 85); 
-    }
-    if (modo_personalizado_on_1 == 0) 
-    {
-      printButton_verde("OFF", 250, 65, 295, 85); 
-    } 
-    else 
-    {
-      printButton("OFF", 250, 65, 295, 85); 
-    }
-    setFont(SMALL, 255, 255, 255, 0, 0, 0);    
-    myGLCD.print("DOSADORA 2:", 10, 100);   
-    myGLCD.print("INICIAL:", 10, 120);  
-    myGLCD.print("FINAL:", 118, 120);
-    myGLCD.print("QUANTIDADE DE DOSES:", 10, 140);
-    myGLCD.print("VOLUME:", 215, 120);    
-    myGLCD.print(":", 90, 120);
-    myGLCD.print(":", 180, 120);
-  
-    myGLCD.printNumF(dose_dosadora_2_personalizada, 1, 275, 120); 
-    myGLCD.printNumI(quantidade_dose_dosadora_2_personalizada, 170, 140);
-    if(hora_inicial_dosagem_personalizada_2 < 10)
-    {
-      myGLCD.printNumI(0, 72, 120);
-      myGLCD.printNumI(hora_inicial_dosagem_personalizada_2, 80, 120);
-    }
-    else
-    {
+  }
+  else
+  {
+    printButton("D", 290, 23, 310, 43);
+  } 
+  if (modo_personalizado_on_1 == 1) 
+  {
+    printButton_verde("ON", 200, 65, 245, 85); 
+  } 
+  else 
+  {
+    printButton("ON", 200, 65, 245, 85); 
+  }
+  if (modo_personalizado_on_1 == 0) 
+  {
+    printButton_verde("OFF", 250, 65, 295, 85); 
+  } 
+  else 
+  {
+    printButton("OFF", 250, 65, 295, 85); 
+  }
+  setFont(SMALL, 255, 255, 255, 0, 0, 0);    
+  myGLCD.print("DOSADORA 2:", 10, 100);   
+  myGLCD.print("INICIAL:", 10, 120);  
+  myGLCD.print("FINAL:", 118, 120);
+  myGLCD.print("QUANTIDADE DE DOSES:", 10, 140);
+  myGLCD.print("VOLUME:", 215, 120);    
+  myGLCD.print(":", 90, 120);
+  myGLCD.print(":", 180, 120);
+
+  myGLCD.printNumF(dose_dosadora_2_personalizada, 1, 275, 120); 
+  myGLCD.printNumI(quantidade_dose_dosadora_2_personalizada, 170, 140);
+  if(hora_inicial_dosagem_personalizada_2 < 10)
+  {
+    myGLCD.printNumI(0, 72, 120);
+    myGLCD.printNumI(hora_inicial_dosagem_personalizada_2, 80, 120);
+  }
+  else
+  {
     myGLCD.printNumI(hora_inicial_dosagem_personalizada_2, 72, 120);
-    }
-    if(minuto_inicial_dosagem_personalizada_2 < 10)
-    {
-      myGLCD.printNumI(0, 98, 120);
-      myGLCD.printNumI(minuto_inicial_dosagem_personalizada_2, 106, 120);
-    }
-    else
-    {
+  }
+  if(minuto_inicial_dosagem_personalizada_2 < 10)
+  {
+    myGLCD.printNumI(0, 98, 120);
+    myGLCD.printNumI(minuto_inicial_dosagem_personalizada_2, 106, 120);
+  }
+  else
+  {
     myGLCD.printNumI(minuto_inicial_dosagem_personalizada_2, 98, 120);
-    }
-    if(hora_final_dosagem_personalizada_2 < 10)
-    {
-      myGLCD.printNumI(0, 165, 120);
-      myGLCD.printNumI(hora_final_dosagem_personalizada_2, 173, 120); 
-    }
-    else
-    {
+  }
+  if(hora_final_dosagem_personalizada_2 < 10)
+  {
+    myGLCD.printNumI(0, 165, 120);
+    myGLCD.printNumI(hora_final_dosagem_personalizada_2, 173, 120); 
+  }
+  else
+  {
     myGLCD.printNumI(hora_final_dosagem_personalizada_2, 165, 120);
-    }
-    if(minuto_final_dosagem_personalizada_2 < 10)
-    {
-      myGLCD.printNumI(0, 188, 120);
-      myGLCD.printNumI(minuto_final_dosagem_personalizada_2, 196, 120);
-    }
-    else
-    {
+  }
+  if(minuto_final_dosagem_personalizada_2 < 10)
+  {
+    myGLCD.printNumI(0, 188, 120);
+    myGLCD.printNumI(minuto_final_dosagem_personalizada_2, 196, 120);
+  }
+  else
+  {
     myGLCD.printNumI(minuto_final_dosagem_personalizada_2, 188, 120);
-    }
-    if(segunda_dosagem_personalizada_2 == 1)
-    {
+  }
+  if(segunda_dosagem_personalizada_2 == 1)
+  {
     printButton_verde("S", 110, 93, 130, 113);
-    }
-    else
-    {
-      printButton("S", 110, 93, 130, 113);
-    }
-    if(terca_dosagem_personalizada_2 == 2)
-    {
+  }
+  else
+  {
+    printButton("S", 110, 93, 130, 113);
+  }
+  if(terca_dosagem_personalizada_2 == 2)
+  {
     printButton_verde("T", 140, 93, 160, 113);
-    }
-    else
-    {
-      printButton("T", 140, 93, 160, 113);
-    }
-    if(quarta_dosagem_personalizada_2 == 3)
-    {
+  }
+  else
+  {
+    printButton("T", 140, 93, 160, 113);
+  }
+  if(quarta_dosagem_personalizada_2 == 3)
+  {
     printButton_verde("Q", 170, 93, 190, 113);
-    }
-    else
-    {
-      printButton("Q", 170, 93, 190, 113);
-    }    
-    if(quinta_dosagem_personalizada_2 == 4)
-    {
+  }
+  else
+  {
+    printButton("Q", 170, 93, 190, 113);
+  }    
+  if(quinta_dosagem_personalizada_2 == 4)
+  {
     printButton_verde("Q", 200, 93, 220, 113);
-    }
-    else
-    {
-      printButton("Q", 200, 93, 220, 113);
-    }    
-    if(sexta_dosagem_personalizada_2 == 5)
-    {
+  }
+  else
+  {
+    printButton("Q", 200, 93, 220, 113);
+  }    
+  if(sexta_dosagem_personalizada_2 == 5)
+  {
     printButton_verde("S", 230, 93, 250, 113);
-    }
-    else
-    {
-      printButton("S", 230, 93, 250, 113);
-    }
-    if(sabado_dosagem_personalizada_2 == 6)
-    {
+  }
+  else
+  {
+    printButton("S", 230, 93, 250, 113);
+  }
+  if(sabado_dosagem_personalizada_2 == 6)
+  {
     printButton_verde("S", 260, 93, 280, 113);
-    }
-    else
-    {
-      printButton("S", 260, 93, 280, 113);
-    }
-    if(sabado_dosagem_personalizada_2 == 7)
-    {
+  }
+  else
+  {
+    printButton("S", 260, 93, 280, 113);
+  }
+  if(sabado_dosagem_personalizada_2 == 7)
+  {
     printButton_verde("D", 290, 93, 310, 113);
-    }
-    else
-    {
-      printButton("D", 290, 93, 310, 113);
-    } 
-    if (modo_personalizado_on_2 == 1) 
-    {
-      printButton_verde("ON", 200, 135, 245, 155); 
-    } 
-    else 
-    {
-      printButton("ON", 200, 135, 245, 155); 
-    }
-    if (modo_personalizado_on_2 == 0) 
-    {
-      printButton_verde("OFF", 250, 135, 295, 155); 
-    } 
-    else 
-    {
-      printButton("OFF", 250, 135, 295, 155); 
-    } 
-    setFont(SMALL, 255, 255, 255, 0, 0, 0);    
-    myGLCD.print("DOSADORA 3:", 10, 170);   
-    myGLCD.print("INICIAL:", 10, 190);  
-    myGLCD.print("FINAL:", 118, 190);
-    myGLCD.print("QUANTIDADE DE DOSES:", 10, 210);
-    myGLCD.print("VOLUME:", 215, 190);    
-    myGLCD.print(":", 90, 190);
-    myGLCD.print(":", 180, 190);
-  
-    myGLCD.printNumF(dose_dosadora_3_personalizada, 1, 275, 190); 
-    myGLCD.printNumI(quantidade_dose_dosadora_3_personalizada, 170, 210);
-    if(hora_inicial_dosagem_personalizada_3 < 10)
-    {
-      myGLCD.printNumI(0, 72, 190);
-      myGLCD.printNumI(hora_inicial_dosagem_personalizada_3, 80, 190);
-    }
-    else
-    {
+  }
+  else
+  {
+    printButton("D", 290, 93, 310, 113);
+  } 
+  if (modo_personalizado_on_2 == 1) 
+  {
+    printButton_verde("ON", 200, 135, 245, 155); 
+  } 
+  else 
+  {
+    printButton("ON", 200, 135, 245, 155); 
+  }
+  if (modo_personalizado_on_2 == 0) 
+  {
+    printButton_verde("OFF", 250, 135, 295, 155); 
+  } 
+  else 
+  {
+    printButton("OFF", 250, 135, 295, 155); 
+  } 
+  setFont(SMALL, 255, 255, 255, 0, 0, 0);    
+  myGLCD.print("DOSADORA 3:", 10, 170);   
+  myGLCD.print("INICIAL:", 10, 190);  
+  myGLCD.print("FINAL:", 118, 190);
+  myGLCD.print("QUANTIDADE DE DOSES:", 10, 210);
+  myGLCD.print("VOLUME:", 215, 190);    
+  myGLCD.print(":", 90, 190);
+  myGLCD.print(":", 180, 190);
+
+  myGLCD.printNumF(dose_dosadora_3_personalizada, 1, 275, 190); 
+  myGLCD.printNumI(quantidade_dose_dosadora_3_personalizada, 170, 210);
+  if(hora_inicial_dosagem_personalizada_3 < 10)
+  {
+    myGLCD.printNumI(0, 72, 190);
+    myGLCD.printNumI(hora_inicial_dosagem_personalizada_3, 80, 190);
+  }
+  else
+  {
     myGLCD.printNumI(hora_inicial_dosagem_personalizada_3, 72, 190);
-    }
-    if(minuto_inicial_dosagem_personalizada_3 < 10)
-    {
-      myGLCD.printNumI(0, 98, 190);
-      myGLCD.printNumI(minuto_inicial_dosagem_personalizada_3, 106, 190);
-    }
-    else
-    {
+  }
+  if(minuto_inicial_dosagem_personalizada_3 < 10)
+  {
+    myGLCD.printNumI(0, 98, 190);
+    myGLCD.printNumI(minuto_inicial_dosagem_personalizada_3, 106, 190);
+  }
+  else
+  {
     myGLCD.printNumI(minuto_inicial_dosagem_personalizada_3, 98, 190);
-    }
-    if(hora_final_dosagem_personalizada_3 < 10)
-    {
-      myGLCD.printNumI(0, 165, 190);
-      myGLCD.printNumI(hora_final_dosagem_personalizada_3, 173, 190); 
-    }
-    else
-    {
+  }
+  if(hora_final_dosagem_personalizada_3 < 10)
+  {
+    myGLCD.printNumI(0, 165, 190);
+    myGLCD.printNumI(hora_final_dosagem_personalizada_3, 173, 190); 
+  }
+  else
+  {
     myGLCD.printNumI(hora_final_dosagem_personalizada_3, 165, 190);
-    }
-    if(minuto_final_dosagem_personalizada_3 < 10)
-    {
-      myGLCD.printNumI(0, 188, 190);
-      myGLCD.printNumI(minuto_final_dosagem_personalizada_3, 196, 190);
-    }
-    else
-    {
+  }
+  if(minuto_final_dosagem_personalizada_3 < 10)
+  {
+    myGLCD.printNumI(0, 188, 190);
+    myGLCD.printNumI(minuto_final_dosagem_personalizada_3, 196, 190);
+  }
+  else
+  {
     myGLCD.printNumI(minuto_final_dosagem_personalizada_3, 188, 190);
-    }
-    if(segunda_dosagem_personalizada_3 == 1)
-    {
+  }
+  if(segunda_dosagem_personalizada_3 == 1)
+  {
     printButton_verde("S", 110, 163, 130, 183);
-    }
-    else
-    {
-      printButton("S", 110, 163, 130, 183);
-    }
-    if(terca_dosagem_personalizada_3 == 2)
-    {
+  }
+  else
+  {
+    printButton("S", 110, 163, 130, 183);
+  }
+  if(terca_dosagem_personalizada_3 == 2)
+  {
     printButton_verde("T", 140, 163, 160, 183);
-    }
-    else
-    {
-      printButton("T", 140, 163, 160, 183);
-    }
-    if(quarta_dosagem_personalizada_3 == 3)
-    {
+  }
+  else
+  {
+    printButton("T", 140, 163, 160, 183);
+  }
+  if(quarta_dosagem_personalizada_3 == 3)
+  {
     printButton_verde("Q", 170, 163, 190, 183);
-    }
-    else
-    {
-      printButton("Q", 170, 163, 190, 183);
-    }    
-    if(quinta_dosagem_personalizada_3 == 4)
-    {
+  }
+  else
+  {
+    printButton("Q", 170, 163, 190, 183);
+  }    
+  if(quinta_dosagem_personalizada_3 == 4)
+  {
     printButton_verde("Q", 200, 163, 220, 183);
-    }
-    else
-    {
-      printButton("Q", 200, 163, 220, 183);
-    }    
-    if(sexta_dosagem_personalizada_3 == 5)
-    {
+  }
+  else
+  {
+    printButton("Q", 200, 163, 220, 183);
+  }    
+  if(sexta_dosagem_personalizada_3 == 5)
+  {
     printButton_verde("S", 230, 163, 250, 183);
-    }
-    else
-    {
-      printButton("S", 230, 163, 250, 183);
-    }
-    if(sabado_dosagem_personalizada_3 == 6)
-    {
+  }
+  else
+  {
+    printButton("S", 230, 163, 250, 183);
+  }
+  if(sabado_dosagem_personalizada_3 == 6)
+  {
     printButton_verde("S", 260, 163, 280, 183);
-    }
-    else
-    {
-      printButton("S", 260, 163, 280, 183);
-    }
-    if(sabado_dosagem_personalizada_3 == 7)
-    {
+  }
+  else
+  {
+    printButton("S", 260, 163, 280, 183);
+  }
+  if(sabado_dosagem_personalizada_3 == 7)
+  {
     printButton_verde("D", 290, 163, 310, 183);
-    }
-    else
-    {
-      printButton("D", 290, 163, 310, 183);
-    } 
-    if (modo_personalizado_on_3 == 1) 
-    {
-      printButton_verde("ON", 200, 205, 245, 225); 
-    } 
-    else 
-    {
-      printButton("ON", 200, 205, 245, 225); 
-    }
-    if (modo_personalizado_on_3 == 0) 
-    {
-      printButton_verde("OFF", 250, 205, 295, 225); 
-    } 
-    else 
-    {
-      printButton("OFF", 250, 205, 295, 225); 
-    }     
+  }
+  else
+  {
+    printButton("D", 290, 163, 310, 183);
+  } 
+  if (modo_personalizado_on_3 == 1) 
+  {
+    printButton_verde("ON", 200, 205, 245, 225); 
+  } 
+  else 
+  {
+    printButton("ON", 200, 205, 245, 225); 
+  }
+  if (modo_personalizado_on_3 == 0) 
+  {
+    printButton_verde("OFF", 250, 205, 295, 225); 
+  } 
+  else 
+  {
+    printButton("OFF", 250, 205, 295, 225); 
+  }     
 }
 
 
@@ -4591,6 +4623,165 @@ void check_nivel() //verifica o nivel do reef e fish only.
   else 
   {
     nivel_status =false; //sinaliza nivel normal dos aquários e sump
+  }
+}
+
+void check_dosagem_automatica_1()
+{
+  int16_t n1;
+  int16_t n11;
+  char buf1[5];
+  char buf11[5];
+  int hora1;
+  int minuto1;
+  int contador1 = 0;
+  int contador2 = 0;
+
+  unsigned long millis_agora_1 = millis();
+
+  if (millis_agora_1 - millis_antes_1 > 60000)
+  {   
+    millis_antes_1 = millis_agora_1;
+
+    digitalWrite (4, LOW);
+
+    if(modo_automatico_on_1 == 1)
+    {
+      file.open(&root, "HDA1.TXT", O_READ);
+      while ((n1 = file.read(buf1, sizeof(buf1))) > 0)
+      {
+
+        hora1 = atoi(buf1);
+        contador1 += 1;
+        if(hora1 == t.hour)
+        {
+          n1 = 0;
+          file.close();
+          file.open(&root, "MDA1.TXT", O_READ);
+          while ((n11 = file.read(buf11, sizeof(buf11))) > 0)
+          {
+            minuto1 = atoi(buf11);
+            contador2 += 1;
+            if ((minuto1 == t.min) && (contador2 == contador1))
+            {
+              Serial.println("Dosando 1:");
+              Serial.println(rtc.getTimeStr(FORMAT_LONG));
+              n11 = 0;
+              file.close();
+            }
+          }
+        }
+      }
+    }
+    contador1 = 0;
+    contador2 = 0; 
+    digitalWrite (4, HIGH);
+  }
+}
+
+void check_dosagem_automatica_2()
+{
+  int16_t n2;
+  int16_t n12;
+  char buf2[5];
+  char buf12[5];
+  int hora2;
+  int minuto2;
+  int contador12 = 0;
+  int contador22 = 0;
+
+  unsigned long millis_agora_2 = millis();
+
+  if (millis_agora_2 - millis_antes_2 > 60000)
+  {   
+    millis_antes_2 = millis_agora_2;
+
+    digitalWrite (4, LOW);
+
+    if(modo_automatico_on_2 == 1)
+    {
+      file.open(&root, "HDA2.TXT", O_READ);
+      while ((n2 = file.read(buf2, sizeof(buf2))) > 0)
+      {
+
+        hora2 = atoi(buf2);
+        contador12 += 1;
+        if(hora2 == t.hour)
+        {
+          n2 = 0;
+          file.close();
+          file.open(&root, "MDA2.TXT", O_READ);
+          while ((n12 = file.read(buf12, sizeof(buf12))) > 0)
+          {
+            minuto2 = atoi(buf12);
+            contador22 += 1;
+            if ((minuto2 == t.min) && (contador22 == contador12))
+            {
+              Serial.println("Dosando 2:");
+              Serial.println(rtc.getTimeStr(FORMAT_LONG));
+              n12 = 0;
+              file.close();
+            }
+          }
+        }
+      }
+    }
+    contador12 = 0;
+    contador22 = 0; 
+    digitalWrite (4, HIGH);
+  }
+}
+
+void check_dosagem_automatica_3()
+{
+  int16_t n3;
+  int16_t n13;
+  char buf3[5];
+  char buf13[5];
+  int hora3;
+  int minuto3;
+  int contador13 = 0;
+  int contador23 = 0;
+
+  unsigned long millis_agora_3 = millis();
+
+  if (millis_agora_3 - millis_antes_3 > 60000)
+  {   
+    millis_antes_3 = millis_agora_3;
+
+    digitalWrite (4, LOW);
+
+    if(modo_automatico_on_3 == 1)
+    {
+      file.open(&root, "HDA3.TXT", O_READ);
+      while ((n3 = file.read(buf3, sizeof(buf3))) > 0)
+      {
+
+        hora3 = atoi(buf3);
+        contador13 += 1;
+        if(hora3 == t.hour)
+        {
+          file.close();
+          n3 = 0;
+          file.open(&root, "MDA3.TXT", O_READ);
+          while ((n13 = file.read(buf13, sizeof(buf13))) > 0)
+          {
+            minuto3 = atoi(buf13);
+            contador23 += 1;
+            if ((minuto3 == t.min) && (contador23 == contador13))
+            {
+              Serial.println("Dosando 3:");
+              Serial.println(rtc.getTimeStr(FORMAT_LONG));
+              n13 = 0;
+              file.close();
+            }
+          }
+        }
+      }
+    }
+    contador13 = 0;
+    contador23 = 0; 
+    digitalWrite (4, HIGH);
   }
 }
 
@@ -6859,7 +7050,7 @@ void processMyTouch()
         }
         config_dosagem_manual();
       }    
-      
+
       if ((x>=volT[0]) && x<=volT[2] && (y>=volT[1]) && (y<=volT[3]))           // Volta a tela altera configuracao das dosadoras
       {
         waitForIt(volT[0], volT[1], volT[2], volT[3]);
@@ -6881,49 +7072,50 @@ void processMyTouch()
         waitForIt(iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
         if((modo_manual == true) && (dosadora_1_selecionada == true))
         {
-         if(fator_calib_dosadora_1 > 10)
-         {
-          printButton_verde("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);  
-          tempo_dosagem_1 = map ((dose_dosadora_1_manual*2), 0, fator_calib_dosadora_1, 0, 60000);
-          tempo_dosagem_1 /= 2;                 
-          delay(10000);
-          digitalWrite(dosadora1, HIGH);
-          delay(tempo_dosagem_1);
-          digitalWrite(dosadora1, LOW);
-          printButton("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
-        }
+          if(fator_calib_dosadora_1 > 10)
+          {
+            printButton_verde("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);  
+            tempo_dosagem_1 = map ((dose_dosadora_1_manual*2), 0, fator_calib_dosadora_1, 0, 60000);
+            tempo_dosagem_1 /= 2;                 
+            delay(10000);
+            digitalWrite(dosadora1, HIGH);
+            delay(tempo_dosagem_1);
+            digitalWrite(dosadora1, LOW);
+            printButton("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
+          }
         }
         if((modo_manual == true) && (dosadora_2_selecionada == true))
         {
-         if(fator_calib_dosadora_2 > 10)
-        {
-          printButton_verde("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
-          tempo_dosagem_2 = map ((dose_dosadora_2_manual*2), 0, fator_calib_dosadora_2, 0, 60000);
-          tempo_dosagem_2 /= 2;
-          delay(10000);
-          digitalWrite(dosadora2, HIGH);
-          delay(tempo_dosagem_2);
-          digitalWrite(dosadora2, LOW);
-          printButton("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
-        }
+          if(fator_calib_dosadora_2 > 10)
+          {
+            printButton_verde("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
+            tempo_dosagem_2 = map ((dose_dosadora_2_manual*2), 0, fator_calib_dosadora_2, 0, 60000);
+            tempo_dosagem_2 /= 2;
+            delay(10000);
+            digitalWrite(dosadora2, HIGH);
+            delay(tempo_dosagem_2);
+            digitalWrite(dosadora2, LOW);
+            printButton("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
+          }
         }
         if((modo_manual == true) && (dosadora_3_selecionada == true))
         {
-         if(fator_calib_dosadora_3 > 10)
-        {
-          printButton_verde("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
-          tempo_dosagem_3 = map ((dose_dosadora_3_manual*2), 0, fator_calib_dosadora_3, 0, 60000);
-          tempo_dosagem_3 /= 2;
-          delay(10000);
-          digitalWrite(dosadora3, HIGH);
-          delay(tempo_dosagem_3);
-          digitalWrite(dosadora3, LOW);
-          printButton("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
-        }
+          if(fator_calib_dosadora_3 > 10)
+          {
+            printButton_verde("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
+            tempo_dosagem_3 = map ((dose_dosadora_3_manual*2), 0, fator_calib_dosadora_3, 0, 60000);
+            tempo_dosagem_3 /= 2;
+            delay(10000);
+            digitalWrite(dosadora3, HIGH);
+            delay(tempo_dosagem_3);
+            digitalWrite(dosadora3, LOW);
+            printButton("INICIAR", iniciaR[0], iniciaR[1], iniciaR[2], iniciaR[3]);
+          }
         }
       }      
       break;
     case 28:   // ----------------------------------------- Config dosagem automatica --------------------------------------
+
       if ((x>=volT[0]) && x<=volT[2] && (y>=volT[1]) && (y<=volT[3]))           // // Volta a tela altera configuracao das dosadoras
       {
         waitForIt(volT[0], volT[1], volT[2], volT[3]);
@@ -6940,8 +7132,8 @@ void processMyTouch()
         dosadora_2_selecionada = false;
         dosadora_3_selecionada = false; 
       }
-   if(dosadora_1_selecionada == true)
-{
+      if(dosadora_1_selecionada == true)
+      {
         if ((y >= houU[1]) && (y <= houU[3])) // Buttons: Time UP
         {
           if ((x >= houU[0]) && (x <= houU[2])) {
@@ -7005,7 +7197,7 @@ void processMyTouch()
             myGLCD.setColor(0, 0, 0);                      
             myGLCD.fillRect(100, 45 + deslocamento_botao_y, 185, 67 + deslocamento_botao_y);
           }           
-          
+
           config_dosagem_automatica();
         }
         if ((x >= minDT[0]) && (x <= minDT[2]) && (y >= minDT[1] + deslocamento_botao_y) && (y <= minDT[3] + deslocamento_botao_y)) // Dose diaria menos
@@ -7069,38 +7261,238 @@ void processMyTouch()
           hora_final_dosagem_automatica_1 = hora_final_dosagem_automatica_1_temp2;
           minuto_final_dosagem_automatica_1 = minuto_final_dosagem_automatica_1_temp2;
 
-        if((hora_final_dosagem_automatica_1_temp2 == hora_inicial_dosagem_automatica_1) && (minuto_final_dosagem_automatica_1_temp2 < (minuto_inicial_dosagem_automatica_1+10)))
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("INTERVALO ", 225, 198);
-         myGLCD.print("ERRADO!", 225, 218);
-         
-        }
-        if(hora_final_dosagem_automatica_1_temp2 < hora_inicial_dosagem_automatica_1)
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("HORA FINAL", 225, 198);
-         myGLCD.print("ERRADA!", 225, 218);
-        }
-        
-        if((hora_final_dosagem_automatica_1_temp2 == hora_inicial_dosagem_automatica_1) && (minuto_final_dosagem_automatica_1_temp2 >= (minuto_inicial_dosagem_automatica_1+10)))
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
-        if(hora_final_dosagem_automatica_1_temp2 > hora_inicial_dosagem_automatica_1)
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }        
-        }   
-}
-   if(dosadora_2_selecionada == true)
-{
+          if((hora_final_dosagem_automatica_1_temp2 == hora_inicial_dosagem_automatica_1) && (minuto_final_dosagem_automatica_1_temp2 < (minuto_inicial_dosagem_automatica_1+10)))
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("INTERVALO ", 225, 198);
+            myGLCD.print("ERRADO!", 225, 218);
+
+          }
+          if(hora_final_dosagem_automatica_1_temp2 < hora_inicial_dosagem_automatica_1)
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("HORA FINAL", 225, 198);
+            myGLCD.print("ERRADA!", 225, 218);
+          }
+          if((hora_final_dosagem_automatica_1_temp2 == hora_inicial_dosagem_automatica_1) && (minuto_final_dosagem_automatica_1_temp2 >= (minuto_inicial_dosagem_automatica_1+10)))
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDA1.TXT", O_WRITE);
+            file.remove();       
+
+            minuto01 = (((hora_final_dosagem_automatica_1 * 60) + (minuto_final_dosagem_automatica_1)) - ((hora_inicial_dosagem_automatica_1 * 60) + (minuto_inicial_dosagem_automatica_1))); 
+            minuto01 /= 1 + quantidade_dose_dosadora_1_automatica; 
+            minuto11 = minuto01 % 60; 
+            hora11 = minuto01 - minuto11; 
+            hora11 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_1_automatica; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_automatica_1 + minuto11;
+                hora01 = hora_inicial_dosagem_automatica_1 + hora11; 
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;
+                hora01 += hora11;  
+              }
+
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 +=1;
+              }
+              file.open(&root, "HDA1.TXT", O_CREAT | O_APPEND | O_WRITE);
+
+              if(hora01 <10)
+              {
+                file.print(0);
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDA1.TXT", O_WRITE);
+            file.remove(); 
+            minuto01 = (((hora_final_dosagem_automatica_1 * 60) + (minuto_final_dosagem_automatica_1)) - ((hora_inicial_dosagem_automatica_1 * 60) + (minuto_inicial_dosagem_automatica_1)));
+            minuto01 /= 1 + quantidade_dose_dosadora_1_automatica; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_1_automatica; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_automatica_1 + minuto11;
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;  
+              }
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto01 += 10;
+                }
+              }  
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 += 1;
+              }
+              file.open(&root, "MDA1.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto01 <10)
+              {
+                file.print(0);
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }
+          if(hora_final_dosagem_automatica_1_temp2 > hora_inicial_dosagem_automatica_1)
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDA1.TXT", O_WRITE);
+            file.remove();       
+
+            minuto01 = (((hora_final_dosagem_automatica_1 * 60) + (minuto_final_dosagem_automatica_1)) - ((hora_inicial_dosagem_automatica_1 * 60) + (minuto_inicial_dosagem_automatica_1)));
+            minuto01 /= 1 + quantidade_dose_dosadora_1_automatica; 
+            minuto11 = minuto01 % 60; 
+            hora11 = minuto01 - minuto11; 
+            hora11 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_1_automatica; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_automatica_1 + minuto11;
+                hora01 = hora_inicial_dosagem_automatica_1 + hora11; //0 + 5 = 5 horas
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;
+                hora01 += hora11;  //11 horas
+              }
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 +=1;
+              }
+              file.open(&root, "HDA1.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora01 <10)
+              {
+                file.print(0);
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDA1.TXT", O_WRITE);
+            file.remove(); 
+            minuto01 = (((hora_final_dosagem_automatica_1 * 60) + (minuto_final_dosagem_automatica_1)) - ((hora_inicial_dosagem_automatica_1 * 60) + (minuto_inicial_dosagem_automatica_1)));
+            minuto01 /= 1 + quantidade_dose_dosadora_1_automatica; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_1_automatica; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_automatica_1 + minuto11;
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;  
+              }  
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 += 1;
+              }
+              file.open(&root, "MDA1.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto01 <10)
+              {
+                file.print(0);
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }      
+        }           
+      }
+      if(dosadora_2_selecionada == true)
+      {
         if ((y >= houU[1]) && (y <= houU[3])) // Buttons: Time UP
         {
           if ((x >= houU[0]) && (x <= houU[2])) {
@@ -7164,7 +7556,7 @@ void processMyTouch()
             myGLCD.setColor(0, 0, 0);                      
             myGLCD.fillRect(100, 45 + deslocamento_botao_y, 185, 67 + deslocamento_botao_y);
           }           
-          
+
           config_dosagem_automatica();
         }
         if ((x >= minDT[0]) && (x <= minDT[2]) && (y >= minDT[1] + deslocamento_botao_y) && (y <= minDT[3] + deslocamento_botao_y)) // Dose diaria menos
@@ -7227,60 +7619,258 @@ void processMyTouch()
           minuto_inicial_dosagem_automatica_2 = minuto_inicial_dosagem_automatica_2_temp2;
           hora_final_dosagem_automatica_2 = hora_final_dosagem_automatica_2_temp2;
           minuto_final_dosagem_automatica_2 = minuto_final_dosagem_automatica_2_temp2;
-          
-        if((hora_final_dosagem_automatica_2_temp2 == hora_inicial_dosagem_automatica_2) && (minuto_final_dosagem_automatica_2_temp2 < (minuto_inicial_dosagem_automatica_2+10)))
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("INTERVALO ", 225, 198);
-         myGLCD.print("ERRADO!", 225, 218);
-         
-        }
-        if(hora_final_dosagem_automatica_2_temp2 < hora_inicial_dosagem_automatica_2)
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("HORA FINAL", 225, 198);
-         myGLCD.print("ERRADA!", 225, 218);
-        }
-        if((hora_final_dosagem_automatica_2_temp2 == hora_inicial_dosagem_automatica_2) && (minuto_final_dosagem_automatica_2_temp2 >= (minuto_inicial_dosagem_automatica_2+10)))
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
-        if(hora_final_dosagem_automatica_2_temp2 > hora_inicial_dosagem_automatica_2)
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }        
+
+          if((hora_final_dosagem_automatica_2_temp2 == hora_inicial_dosagem_automatica_2) && (minuto_final_dosagem_automatica_2_temp2 < (minuto_inicial_dosagem_automatica_2+10)))
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("INTERVALO ", 225, 198);
+            myGLCD.print("ERRADO!", 225, 218);
+
+          }
+          if(hora_final_dosagem_automatica_2_temp2 < hora_inicial_dosagem_automatica_2)
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("HORA FINAL", 225, 198);
+            myGLCD.print("ERRADA!", 225, 218);
+          }
+          if((hora_final_dosagem_automatica_2_temp2 == hora_inicial_dosagem_automatica_2) && (minuto_final_dosagem_automatica_2_temp2 >= (minuto_inicial_dosagem_automatica_2+10)))
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDA2.TXT", O_WRITE);
+            file.remove();       
+
+            minuto02 = (((hora_final_dosagem_automatica_2 * 60) + (minuto_final_dosagem_automatica_2)) - ((hora_inicial_dosagem_automatica_2 * 60) + (minuto_inicial_dosagem_automatica_2))); 
+            minuto02 /= 1 + quantidade_dose_dosadora_2_automatica; 
+            minuto12 = minuto02 % 60; 
+            hora12 = minuto02 - minuto12; 
+            hora12 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_2_automatica; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_automatica_2 + minuto12;
+                hora02 = hora_inicial_dosagem_automatica_2 + hora12;
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;
+                hora02 += hora12;
+              }
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 +=1;
+              }
+              file.open(&root, "HDA2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora02 <10)
+              {
+                file.print(0);
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }     
+            }
+            contador = 0;
+            file.open(&root, "MDA2.TXT", O_WRITE);
+            file.remove(); 
+            minuto02 = (((hora_final_dosagem_automatica_2 * 60) + (minuto_final_dosagem_automatica_2)) - ((hora_inicial_dosagem_automatica_2 * 60) + (minuto_inicial_dosagem_automatica_2)));
+            minuto02 /= 1 + quantidade_dose_dosadora_2_automatica; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_2_automatica; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_automatica_2 + minuto12;
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;  
+              }  
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 += 1;
+              }
+              file.open(&root, "MDA2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto02 <10)
+              {
+                file.print(0);
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }      
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }
+          if(hora_final_dosagem_automatica_2_temp2 > hora_inicial_dosagem_automatica_2)
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDA2.TXT", O_WRITE);
+            file.remove();       
+
+            minuto02 = (((hora_final_dosagem_automatica_2 * 60) + (minuto_final_dosagem_automatica_2)) - ((hora_inicial_dosagem_automatica_2 * 60) + (minuto_inicial_dosagem_automatica_2))); 
+            minuto02 /= 1 + quantidade_dose_dosadora_2_automatica; 
+            minuto12 = minuto02 % 60; 
+            hora12 = minuto02 - minuto12; 
+            hora12 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_2_automatica; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_automatica_2 + minuto12;
+                hora02 = hora_inicial_dosagem_automatica_2 + hora12; 
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;
+                hora02 += hora12;  
+              }
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 += 1;
+              }
+              file.open(&root, "HDA2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora02 <10)
+              {
+                file.print(0);
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDA2.TXT", O_WRITE);
+            file.remove(); 
+            minuto02 = (((hora_final_dosagem_automatica_2 * 60) + (minuto_final_dosagem_automatica_2)) - ((hora_inicial_dosagem_automatica_2 * 60) + (minuto_inicial_dosagem_automatica_2)));
+            minuto02 /= 1 + quantidade_dose_dosadora_2_automatica; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_2_automatica; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_automatica_2 + minuto12;
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;  
+              }  
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 += 1;
+              }
+              file.open(&root, "MDA2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto02 <10)
+              {
+                file.print(0);
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }   
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }        
         }   
-}
-   if(dosadora_3_selecionada == true)
-{
+      }
+      if(dosadora_3_selecionada == true)
+      {
         if ((y >= houU[1]) && (y <= houU[3])) // Buttons: Time UP
         {
           if ((x >= houU[0]) && (x <= houU[2])) {
             waitForIt(houU[0], houU[1], houU[2], houU[3]);
-            hora_inicial_dosagem_automatica_2_temp2  = (hora_inicial_dosagem_automatica_2_temp2  + 1) % 24;
+            hora_inicial_dosagem_automatica_3_temp2  = (hora_inicial_dosagem_automatica_3_temp2  + 1) % 24;
             config_dosagem_automatica();
           } 
           if ((x >= minUT[0]) && (x <= minUT[2])) {
             waitForIt(minUT[0], minUT[1], minUT[2], minUT[3]);
-            minuto_inicial_dosagem_automatica_2_temp2  = (minuto_inicial_dosagem_automatica_2_temp2  + 1) % 60;
+            minuto_inicial_dosagem_automatica_3_temp2  = (minuto_inicial_dosagem_automatica_3_temp2  + 1) % 60;
             config_dosagem_automatica();
           } 
 
 
           if ((x >= houU[0] + deslocamento_botao_x) && (x <= houU[2] + deslocamento_botao_x)) {
             waitForIt(houU[0] + deslocamento_botao_x, houU[1], houU[2] + deslocamento_botao_x, houU[3]);
-            hora_final_dosagem_automatica_2_temp2  = (hora_final_dosagem_automatica_2_temp2  + 1) % 24;
+            hora_final_dosagem_automatica_3_temp2  = (hora_final_dosagem_automatica_3_temp2  + 1) % 24;
             config_dosagem_automatica();
           } 
           if ((x >= minUT[0] + deslocamento_botao_x) && (x <= minUT[2] + deslocamento_botao_x)) {
             waitForIt(minUT[0] + deslocamento_botao_x, minUT[1], minUT[2] + deslocamento_botao_x, minUT[3]);
-            minuto_final_dosagem_automatica_2_temp2  = (minuto_final_dosagem_automatica_2_temp2  + 1) % 60;
+            minuto_final_dosagem_automatica_3_temp2  = (minuto_final_dosagem_automatica_3_temp2  + 1) % 60;
             config_dosagem_automatica();
           }
 
@@ -7289,23 +7879,23 @@ void processMyTouch()
         {
           if ((x >= houD[0]) && (x <= houD[2])) {
             waitForIt(houD[0], houD[1], houD[2], houD[3]);
-            hora_inicial_dosagem_automatica_2_temp2  = (hora_inicial_dosagem_automatica_2_temp2  + 23) % 24;
+            hora_inicial_dosagem_automatica_3_temp2  = (hora_inicial_dosagem_automatica_3_temp2  + 23) % 24;
             config_dosagem_automatica();
           } 
           if ((x >= minDT[0]) && (x <= minDT[2])) {
             waitForIt(minDT[0], minDT[1], minDT[2], minDT[3]);
-            minuto_inicial_dosagem_automatica_2_temp2  = (minuto_inicial_dosagem_automatica_2_temp2  + 59) % 60;
+            minuto_inicial_dosagem_automatica_3_temp2  = (minuto_inicial_dosagem_automatica_3_temp2  + 59) % 60;
             config_dosagem_automatica();
           } 
 
           if ((x >= houD[0] + deslocamento_botao_x) && (x <= houD[2] + deslocamento_botao_x)) {
             waitForIt(houD[0] + deslocamento_botao_x, houD[1], houD[2] + deslocamento_botao_x, houD[3]);
-            hora_final_dosagem_automatica_2_temp2  = (hora_final_dosagem_automatica_2_temp2  + 23) % 24;
+            hora_final_dosagem_automatica_3_temp2  = (hora_final_dosagem_automatica_3_temp2  + 23) % 24;
             config_dosagem_automatica();
           } 
           if ((x >= minDT[0] + deslocamento_botao_x) && (x <= minDT[2] + deslocamento_botao_x)) {
             waitForIt(minDT[0] + deslocamento_botao_x, minDT[1], minDT[2] + deslocamento_botao_x, minDT[3]);
-            minuto_final_dosagem_automatica_2_temp2  = (minuto_final_dosagem_automatica_2_temp2  + 59) % 60;
+            minuto_final_dosagem_automatica_3_temp2  = (minuto_final_dosagem_automatica_3_temp2  + 59) % 60;
             config_dosagem_automatica();
           }
         }
@@ -7322,7 +7912,7 @@ void processMyTouch()
             myGLCD.setColor(0, 0, 0);                      
             myGLCD.fillRect(100, 45 + deslocamento_botao_y, 185, 67 + deslocamento_botao_y);
           }           
-          
+
           config_dosagem_automatica();
         }
         if ((x >= minDT[0]) && (x <= minDT[2]) && (y >= minDT[1] + deslocamento_botao_y) && (y <= minDT[3] + deslocamento_botao_y)) // Dose diaria menos
@@ -7385,36 +7975,234 @@ void processMyTouch()
           minuto_inicial_dosagem_automatica_3  = minuto_inicial_dosagem_automatica_3_temp2;
           hora_final_dosagem_automatica_3  = hora_final_dosagem_automatica_3_temp2;
           minuto_final_dosagem_automatica_3  = minuto_final_dosagem_automatica_3_temp2;
-          
-        if((hora_final_dosagem_automatica_2_temp2  == hora_inicial_dosagem_automatica_3) && (minuto_final_dosagem_automatica_2_temp2  < (minuto_inicial_dosagem_automatica_3+10)))
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("INTERVALO ", 225, 198);
-         myGLCD.print("ERRADO!", 225, 218);
-         
-        }
-        if(hora_final_dosagem_automatica_2_temp2  < hora_inicial_dosagem_automatica_3)
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("HORA FINAL", 225, 198);
-         myGLCD.print("ERRADA!", 225, 218);
-        }
-        if((hora_final_dosagem_automatica_2_temp2  == hora_inicial_dosagem_automatica_3) && (minuto_final_dosagem_automatica_2_temp2  >= (minuto_inicial_dosagem_automatica_3+10)))
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
-        if(hora_final_dosagem_automatica_2_temp2  > hora_inicial_dosagem_automatica_3)
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }        
+
+          if((hora_final_dosagem_automatica_3_temp2  == hora_inicial_dosagem_automatica_3) && (minuto_final_dosagem_automatica_3_temp2  < (minuto_inicial_dosagem_automatica_3+10)))
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("INTERVALO ", 225, 198);
+            myGLCD.print("ERRADO!", 225, 218);
+
+          }
+          if(hora_final_dosagem_automatica_3_temp2  < hora_inicial_dosagem_automatica_3)
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("HORA FINAL", 225, 198);
+            myGLCD.print("ERRADA!", 225, 218);
+          }
+          if((hora_final_dosagem_automatica_3_temp2 == hora_inicial_dosagem_automatica_3) && (minuto_final_dosagem_automatica_3_temp2 >= (minuto_inicial_dosagem_automatica_3+10)))
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDA3.TXT", O_WRITE);
+            file.remove();       
+
+            minuto03 = (((hora_final_dosagem_automatica_3 * 60) + (minuto_final_dosagem_automatica_3)) - ((hora_inicial_dosagem_automatica_3 * 60) + (minuto_inicial_dosagem_automatica_3)));
+            minuto03 /= 1 + quantidade_dose_dosadora_3_automatica; 
+            minuto13 = minuto03 % 60; 
+            hora13 = minuto03 - minuto13; 
+            hora13 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_3_automatica; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_automatica_3 + minuto13;
+                hora03 = hora_inicial_dosagem_automatica_3 + hora13; 
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;
+                hora03 += hora13;  
+              }
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 +=1;
+              }
+              file.open(&root, "HDA3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora02 <10)
+              {
+                file.print(0);
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDA3.TXT", O_WRITE);
+            file.remove(); 
+            minuto03 = (((hora_final_dosagem_automatica_3 * 60) + (minuto_final_dosagem_automatica_3)) - ((hora_inicial_dosagem_automatica_3 * 60) + (minuto_inicial_dosagem_automatica_3)));
+            minuto03 /= 1 + quantidade_dose_dosadora_3_automatica; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_3_automatica; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_automatica_3 + minuto13;
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;  
+              }  
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 += 1;
+              }
+              file.open(&root, "MDA3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto03 <10)
+              {
+                file.print(0);
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }   
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }
+          if(hora_final_dosagem_automatica_3_temp2 > hora_inicial_dosagem_automatica_3)
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDA3.TXT", O_WRITE);
+            file.remove();       
+
+            minuto03 = (((hora_final_dosagem_automatica_3 * 60) + (minuto_final_dosagem_automatica_3)) - ((hora_inicial_dosagem_automatica_3 * 60) + (minuto_inicial_dosagem_automatica_3))); 
+            minuto03 /= 1 + quantidade_dose_dosadora_3_automatica; 
+            minuto13 = minuto03 % 60; 
+            hora13 = minuto03 - minuto13; 
+            hora13 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_3_automatica; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_automatica_3 + minuto13;
+                hora03 = hora_inicial_dosagem_automatica_3 + hora13; 
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;
+                hora03 += hora13;  
+              }
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 += 1;
+              }
+              file.open(&root, "HDA3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora03 <10)
+              {
+                file.print(0);
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDA3.TXT", O_WRITE);
+            file.remove(); 
+            minuto03 = (((hora_final_dosagem_automatica_3 * 60) + (minuto_final_dosagem_automatica_3)) - ((hora_inicial_dosagem_automatica_3 * 60) + (minuto_inicial_dosagem_automatica_3)));
+            minuto03 /= 1 + quantidade_dose_dosadora_3_automatica; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_3_automatica; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_automatica_3 + minuto13;
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;  
+              } 
+              if((quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_2_automatica) || (quantidade_dose_dosadora_1_automatica == quantidade_dose_dosadora_3_automatica))
+              {
+                if((hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_2) || (hora_inicial_dosagem_automatica_1 == hora_inicial_dosagem_automatica_3))
+                {
+                  minuto03 += 10;
+                }
+              } 
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 += 1;
+              }
+              file.open(&root, "MDA3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto03 <10)
+              {
+                file.print(0);
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }        
         }   
-}
+      }
       break;
 
     case 29:   // ----------------------------------------- Config dosagem personalizada --------------------------------------
@@ -7432,7 +8220,7 @@ void processMyTouch()
         dosadora_2_selecionada = false;
         dosadora_3_selecionada = false;
       }
-       if ((x>=volT[0]) && x<=volT[2] && (y>=volT[1]) && (y<=volT[3]))           // Volta a tela altera configuracao das dosadoras
+      if ((x>=volT[0]) && x<=volT[2] && (y>=volT[1]) && (y<=volT[3]))           // Volta a tela altera configuracao das dosadoras
       {
         waitForIt(volT[0], volT[1], volT[2], volT[3]);
         dispScreen = 21;
@@ -7971,7 +8759,7 @@ void processMyTouch()
             myGLCD.setColor(0, 0, 0);                      
             myGLCD.fillRect(100, 45, 185, 67);
           }           
-          
+
           config_dosagem_personalizada_2();
         }
         if ((x >= minDT[0]) && (x <= minDT[2]) && (y >= minDT[1]) && (y <= minDT[3])) // Dose diaria menos
@@ -8041,34 +8829,233 @@ void processMyTouch()
           sexta_dosagem_personalizada_1 = temp2sexta_dosagem_personalizada_1;
           sabado_dosagem_personalizada_1 = temp2sabado_dosagem_personalizada_1;
           domingo_dosagem_personalizada_1 = temp2domingo_dosagem_personalizada_1;
-          
-        if((hora_final_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_1) && (minuto_final_dosagem_personalizada_1 < (minuto_inicial_dosagem_personalizada_1+10)))
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("O INTERVALO ENTRE A INICIAL E A FINAL", 20, 110);
-         myGLCD.print("DEVE SER DE NO MINIMO 10 MINUTOS!", 35, 130);
-         
-        }
-        if(hora_final_dosagem_personalizada_1 < hora_inicial_dosagem_personalizada_1)
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("A HORA FINAL NAO PODE SER MENOR", 50, 110);
-         myGLCD.print("QUE A INICIAL!", 100, 130);
-        }
-        if((hora_final_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_1) && (minuto_final_dosagem_personalizada_1 >= (minuto_inicial_dosagem_personalizada_1+10)))
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
-        if(hora_final_dosagem_personalizada_1 > hora_inicial_dosagem_personalizada_1)
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }        
+
+          if((hora_final_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_1) && (minuto_final_dosagem_personalizada_1 < (minuto_inicial_dosagem_personalizada_1+10)))
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("O INTERVALO ENTRE A INICIAL E A FINAL", 20, 110);
+            myGLCD.print("DEVE SER DE NO MINIMO 10 MINUTOS!", 35, 130);
+
+          }
+          if(hora_final_dosagem_personalizada_1 < hora_inicial_dosagem_personalizada_1)
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("A HORA FINAL NAO PODE SER MENOR", 50, 110);
+            myGLCD.print("QUE A INICIAL!", 100, 130);
+          }
+          if((temp2hora_final_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_1) && (temp2minuto_final_dosagem_personalizada_1 >= (minuto_inicial_dosagem_personalizada_1+10)))
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDP1.TXT", O_WRITE);
+            file.remove();       
+
+            minuto01 = (((hora_final_dosagem_personalizada_1 * 60) + (minuto_final_dosagem_personalizada_1)) - ((hora_inicial_dosagem_personalizada_1 * 60) + (minuto_inicial_dosagem_personalizada_1))); 
+            minuto01 /= 1 + quantidade_dose_dosadora_1_personalizada; 
+            minuto11 = minuto01 % 60; 
+            hora11 = minuto01 - minuto11; 
+            hora11 /= 60;   
+            for(int i = 1; i <= quantidade_dose_dosadora_1_personalizada; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_personalizada_1 + minuto11;
+                hora01 = hora_inicial_dosagem_personalizada_1 + hora11; 
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;
+                hora01 += hora11;  
+              }
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 +=1;
+              }
+              file.open(&root, "HDP1.TXT", O_CREAT | O_APPEND | O_WRITE);
+
+              if(hora01 <10)
+              {
+                file.print(0);
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDP1.TXT", O_WRITE);
+            file.remove(); 
+            minuto01 = (((hora_final_dosagem_personalizada_1 * 60) + (minuto_final_dosagem_personalizada_1)) - ((hora_inicial_dosagem_personalizada_1 * 60) + (minuto_inicial_dosagem_personalizada_1)));
+            minuto01 /= 1 + quantidade_dose_dosadora_1_personalizada; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_1_personalizada; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_personalizada_1 + minuto11;
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;  
+              }  
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 += 1;
+              }
+              file.open(&root, "MDP1.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto01 <10)
+              {
+                file.print(0);
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }
+          if(temp2hora_final_dosagem_personalizada_1 > hora_inicial_dosagem_personalizada_1)
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDP1.TXT", O_WRITE);
+            file.remove();       
+
+            minuto01 = (((hora_final_dosagem_personalizada_1 * 60) + (minuto_final_dosagem_personalizada_1)) - ((hora_inicial_dosagem_personalizada_1 * 60) + (minuto_inicial_dosagem_personalizada_1)));
+            minuto01 /= 1 + quantidade_dose_dosadora_1_personalizada; 
+            minuto11 = minuto01 % 60; 
+            hora11 = minuto01 - minuto11; 
+            hora11 /= 60;  
+            for(int i = 1; i <= quantidade_dose_dosadora_1_personalizada; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_personalizada_1 + minuto11;
+                hora01 = hora_inicial_dosagem_personalizada_1 + hora11; 
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;
+                hora01 += hora11;  
+              }
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 +=1;
+              }
+              file.open(&root, "HDP1.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora01 <10)
+              {
+                file.print(0);
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDP1.TXT", O_WRITE);
+            file.remove(); 
+            minuto01 = (((hora_final_dosagem_personalizada_1 * 60) + (minuto_final_dosagem_personalizada_1)) - ((hora_inicial_dosagem_personalizada_1 * 60) + (minuto_inicial_dosagem_personalizada_1)));
+            minuto01 /= 1 + quantidade_dose_dosadora_1_personalizada; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_1_personalizada; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto01 = minuto_inicial_dosagem_personalizada_1 + minuto11;
+              }
+              if(contador > 1)
+              {
+                minuto01 += minuto11;  
+              }  
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto01 += 10;
+                }
+              }
+              if(minuto01 >= 60)
+              {
+                minuto01 -= 60;
+                hora01 += 1;
+              }
+              file.open(&root, "MDP1.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto01 <10)
+              {
+                file.print(0);
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto01);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }        
         } 
       }      
       if(dosadora_2_selecionada == true)
@@ -8155,32 +9142,231 @@ void processMyTouch()
           sexta_dosagem_personalizada_2 = temp2sexta_dosagem_personalizada_2;
           sabado_dosagem_personalizada_2 = temp2sabado_dosagem_personalizada_2;
           domingo_dosagem_personalizada_2 = temp2domingo_dosagem_personalizada_2;
-        if((hora_final_dosagem_personalizada_2 == hora_inicial_dosagem_personalizada_2) && (minuto_final_dosagem_personalizada_2 < (minuto_inicial_dosagem_personalizada_2+10)))
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("O INTERVALO ENTRE A INICIAL E A FINAL", 20, 110);
-         myGLCD.print("DEVE SER DE NO MINIMO 10 MINUTOS!", 35, 130);
-        }
-        if(hora_final_dosagem_personalizada_2 < hora_inicial_dosagem_personalizada_2)
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("A HORA FINAL NAO PODE SER MENOR", 50, 110);
-         myGLCD.print("QUE A INICIAL!", 100, 130);
-        }
-        if((hora_final_dosagem_personalizada_2 == hora_inicial_dosagem_personalizada_2) && (minuto_final_dosagem_personalizada_2 >= (minuto_inicial_dosagem_personalizada_2+10)))
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
-        if(hora_final_dosagem_personalizada_2 > hora_inicial_dosagem_personalizada_2)
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
+          if((hora_final_dosagem_personalizada_2 == hora_inicial_dosagem_personalizada_2) && (minuto_final_dosagem_personalizada_2 < (minuto_inicial_dosagem_personalizada_2+10)))
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("O INTERVALO ENTRE A INICIAL E A FINAL", 20, 110);
+            myGLCD.print("DEVE SER DE NO MINIMO 10 MINUTOS!", 35, 130);
+          }
+          if(hora_final_dosagem_personalizada_2 < hora_inicial_dosagem_personalizada_2)
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("A HORA FINAL NAO PODE SER MENOR", 50, 110);
+            myGLCD.print("QUE A INICIAL!", 100, 130);
+          }
+          if((temp2hora_final_dosagem_personalizada_2 == hora_inicial_dosagem_personalizada_2) && (temp2minuto_final_dosagem_personalizada_2 >= (minuto_inicial_dosagem_personalizada_2+10)))
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDP2.TXT", O_WRITE);
+            file.remove();       
+
+            minuto02 = (((hora_final_dosagem_personalizada_2 * 60) + (minuto_final_dosagem_personalizada_2)) - ((hora_inicial_dosagem_personalizada_2 * 60) + (minuto_inicial_dosagem_personalizada_2))); //1439
+            minuto02 /= 1 + quantidade_dose_dosadora_2_personalizada; //359
+            minuto12 = minuto02 % 60; //59
+            hora12 = minuto02 - minuto12; //300
+            hora12 /= 60;   //5 horas
+            for(int i = 1; i <= quantidade_dose_dosadora_2_personalizada; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_personalizada_2 + minuto12;
+                hora02 = hora_inicial_dosagem_personalizada_2 + hora12; //0 + 5 = 5 horas
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;
+                hora02 += hora12;  //12 horas
+              }
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 +=1;
+              }
+              file.open(&root, "HDP2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora02 <10)
+              {
+                file.print(0);
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }     
+            }
+            contador = 0;
+            file.open(&root, "MDP2.TXT", O_WRITE);
+            file.remove(); 
+            minuto02 = (((hora_final_dosagem_personalizada_2 * 60) + (minuto_final_dosagem_personalizada_2)) - ((hora_inicial_dosagem_personalizada_2 * 60) + (minuto_inicial_dosagem_personalizada_2)));
+            minuto02 /= 1 + quantidade_dose_dosadora_2_personalizada; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_2_personalizada; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_personalizada_2 + minuto12;
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;  
+              }  
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 += 1;
+              }
+              file.open(&root, "MDP2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto02 <10)
+              {
+                file.print(0);
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }      
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }
+          if(temp2hora_final_dosagem_personalizada_2 > hora_inicial_dosagem_personalizada_2)
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDP2.TXT", O_WRITE);
+            file.remove();       
+
+            minuto02 = (((hora_final_dosagem_personalizada_2 * 60) + (minuto_final_dosagem_personalizada_2)) - ((hora_inicial_dosagem_personalizada_2 * 60) + (minuto_inicial_dosagem_personalizada_2))); //1439
+            minuto02 /= 1 + quantidade_dose_dosadora_2_personalizada; //359
+            minuto12 = minuto02 % 60; //59
+            hora12 = minuto02 - minuto12; //300
+            hora12 /= 60;   //5 horas
+            for(int i = 1; i <= quantidade_dose_dosadora_2_personalizada; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_personalizada_2 + minuto12;
+                hora02 = hora_inicial_dosagem_personalizada_2 + hora12; //0 + 5 = 5 horas
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;
+                hora02 += hora12;  //12 horas
+              }
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 += 1;
+              }
+              file.open(&root, "HDP2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora02 <10)
+              {
+                file.print(0);
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDP2.TXT", O_WRITE);
+            file.remove(); 
+            minuto02 = (((hora_final_dosagem_personalizada_2 * 60) + (minuto_final_dosagem_personalizada_2)) - ((hora_inicial_dosagem_personalizada_2 * 60) + (minuto_inicial_dosagem_personalizada_2)));
+            minuto02 /= 1 + quantidade_dose_dosadora_2_personalizada; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_2_personalizada; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto02 = minuto_inicial_dosagem_personalizada_2 + minuto12;
+              }
+              if(contador > 1)
+              {
+                minuto02 += minuto12;  
+              }  
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto02 += 10;
+                }
+              }
+              if(minuto02 >= 60)
+              {
+                minuto02 -= 60;
+                hora02 += 1;
+              }
+              file.open(&root, "MDP2.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto02 <10)
+              {
+                file.print(0);
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto02);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }   
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }        
+
         }      
       }
       if(dosadora_3_selecionada == true)
@@ -8267,32 +9453,231 @@ void processMyTouch()
           sexta_dosagem_personalizada_3 = temp2sexta_dosagem_personalizada_3;
           sabado_dosagem_personalizada_3 = temp2sabado_dosagem_personalizada_3;
           domingo_dosagem_personalizada_3 = temp2domingo_dosagem_personalizada_3;
-        if((hora_final_dosagem_personalizada_3 == hora_inicial_dosagem_personalizada_3) && (minuto_final_dosagem_personalizada_3 < (minuto_inicial_dosagem_personalizada_3+10)))
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("O INTERVALO ENTRE A INICIAL E A FINAL", 20, 110);
-         myGLCD.print("DEVE SER DE NO MINIMO 10 MINUTOS!", 35, 130);
-        }
-        if(hora_final_dosagem_personalizada_3 < hora_inicial_dosagem_personalizada_3)
-        {
-         setFont(SMALL, 255, 0, 0, 0, 0, 0);
-         myGLCD.print("A HORA FINAL NAO PODE SER MENOR", 50, 110);
-         myGLCD.print("QUE A INICIAL!", 100, 130);
-        }
-        if((hora_final_dosagem_personalizada_3 == hora_inicial_dosagem_personalizada_3) && (minuto_final_dosagem_personalizada_3 >= (minuto_inicial_dosagem_personalizada_3+10)))
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
-        if(hora_final_dosagem_personalizada_3 > hora_inicial_dosagem_personalizada_3)
-        {
-          Salvar_dosadora_EEPROM();
-          dispScreen = 0;
-          clearScreen();
-          mainScreen(true);
-        }
+          if((hora_final_dosagem_personalizada_3 == hora_inicial_dosagem_personalizada_3) && (minuto_final_dosagem_personalizada_3 < (minuto_inicial_dosagem_personalizada_3+10)))
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("O INTERVALO ENTRE A INICIAL E A FINAL", 20, 110);
+            myGLCD.print("DEVE SER DE NO MINIMO 10 MINUTOS!", 35, 130);
+          }
+          if(hora_final_dosagem_personalizada_3 < hora_inicial_dosagem_personalizada_3)
+          {
+            setFont(SMALL, 255, 0, 0, 0, 0, 0);
+            myGLCD.print("A HORA FINAL NAO PODE SER MENOR", 50, 110);
+            myGLCD.print("QUE A INICIAL!", 100, 130);
+          }
+          if((temp2hora_final_dosagem_personalizada_3 == hora_inicial_dosagem_personalizada_3) && (temp2minuto_final_dosagem_personalizada_3 >= (minuto_inicial_dosagem_personalizada_3+10)))
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDP3.TXT", O_WRITE);
+            file.remove();       
+
+            minuto03 = (((hora_final_dosagem_personalizada_3 * 60) + (minuto_final_dosagem_personalizada_3)) - ((hora_inicial_dosagem_personalizada_3 * 60) + (minuto_inicial_dosagem_personalizada_3))); //1439
+            minuto03 /= 1 + quantidade_dose_dosadora_3_personalizada; //359
+            minuto13 = minuto03 % 60; //59
+            hora13 = minuto03 - minuto13; //300
+            hora13 /= 60;   //5 horas
+            for(int i = 1; i <= quantidade_dose_dosadora_3_personalizada; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_personalizada_3 + minuto13;
+                hora03 = hora_inicial_dosagem_personalizada_3 + hora13; //0 + 5 = 5 horas
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;
+                hora03 += hora13;  //13 horas
+              }
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 +=1;
+              }
+              file.open(&root, "HDP3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora02 <10)
+              {
+                file.print(0);
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDP3.TXT", O_WRITE);
+            file.remove(); 
+            minuto03 = (((hora_final_dosagem_personalizada_3 * 60) + (minuto_final_dosagem_personalizada_3)) - ((hora_inicial_dosagem_personalizada_3 * 60) + (minuto_inicial_dosagem_personalizada_3)));
+            minuto03 /= 1 + quantidade_dose_dosadora_3_personalizada; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_3_personalizada; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_personalizada_3 + minuto13;
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;  
+              }  
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 += 1;
+              }
+              file.open(&root, "MDP3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto03 <10)
+              {
+                file.print(0);
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }   
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }
+          if(temp2hora_final_dosagem_personalizada_3 > hora_inicial_dosagem_personalizada_3)
+          {
+            Salvar_dosadora_EEPROM();
+            dispScreen = 0;
+            clearScreen();
+            mainScreen(true);
+            digitalWrite (4, LOW); 
+            file.open(&root, "HDP3.TXT", O_WRITE);
+            file.remove();       
+
+            minuto03 = (((hora_final_dosagem_personalizada_3 * 60) + (minuto_final_dosagem_personalizada_3)) - ((hora_inicial_dosagem_personalizada_3 * 60) + (minuto_inicial_dosagem_personalizada_3))); //1439
+            minuto03 /= 1 + quantidade_dose_dosadora_3_personalizada; //359
+            minuto13 = minuto03 % 60; //59
+            hora13 = minuto03 - minuto13; //300
+            hora13 /= 60;   //5 horas
+            for(int i = 1; i <= quantidade_dose_dosadora_3_personalizada; i++)
+            { 
+              contador += 1;  
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_personalizada_3 + minuto13;
+                hora03 = hora_inicial_dosagem_personalizada_3 + hora13; //0 + 5 = 5 horas
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;
+                hora03 += hora13;  //13 horas
+              }
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 += 1;
+              }
+              file.open(&root, "HDP3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(hora03 <10)
+              {
+                file.print(0);
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(hora03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            file.open(&root, "MDP3.TXT", O_WRITE);
+            file.remove(); 
+            minuto03 = (((hora_final_dosagem_personalizada_3 * 60) + (minuto_final_dosagem_personalizada_3)) - ((hora_inicial_dosagem_personalizada_3 * 60) + (minuto_inicial_dosagem_personalizada_3)));
+            minuto03 /= 1 + quantidade_dose_dosadora_3_personalizada; 
+
+            for(int j = 1; j <= quantidade_dose_dosadora_3_personalizada; j++)
+            { 
+              contador += 1;   
+              if(contador == 1)
+              {
+                minuto03 = minuto_inicial_dosagem_personalizada_3 + minuto13;
+              }
+              if(contador > 1)
+              {
+                minuto03 += minuto13;  
+              }  
+              if((quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_2_personalizada) || (quantidade_dose_dosadora_1_personalizada == quantidade_dose_dosadora_3_personalizada))
+              {
+                if((hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_2) || (hora_inicial_dosagem_personalizada_1 == hora_inicial_dosagem_personalizada_3))
+                {
+                  minuto03 += 10;
+                }
+              }
+              if(minuto03 >= 60)
+              {
+                minuto03 -= 60;
+                hora03 += 1;
+              }
+              file.open(&root, "MDP3.TXT", O_CREAT | O_APPEND | O_WRITE);
+              if(minuto03 <10)
+              {
+                file.print(0);
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }
+              else
+              {
+                file.print(minuto03);
+                file.write((uint8_t*)"\0", 1);
+                writeCRLF(file);
+                file.close(); 
+              }    
+            }
+            contador = 0;
+            digitalWrite (4, HIGH);    
+          }        
+
         }
       }      
       break;
@@ -8430,13 +9815,13 @@ void loop()
   int valor4=0;
   int valor5=0;
   int valor6=0;
-
+/*
   valor1 = analogRead(sensor1);
   valor2 = analogRead(sensor2);
   valor3 = analogRead(sensor3);
   valor4 = analogRead(sensor4);
   valor5 = analogRead(sensor5);
-  valor6 = analogRead(sensor6);
+  valor6 = analogRead(sensor6);*/
 
   unsigned long currentMillis = millis();
   unsigned long logtempminutoagora = millis();
@@ -8529,12 +9914,15 @@ void loop()
      Serial.println("Bomba3: desligada");
      }*/
   }
+  check_dosagem_automatica_1();
   checktpa();
   check_status();
   logtempgraf();
+  check_dosagem_automatica_2();
   logphagraf();
   logphrgraf();
   logdengraf();
+  check_dosagem_automatica_3();
   logorpgraf();
   check_parametros();
   cosm ();
