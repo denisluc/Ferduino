@@ -10,7 +10,7 @@
  * Adafruit SD shields and modules, pin 10.
  * Default SD chip select is the SPI SS pin.
  */
-const uint8_t SdChipSelect = SS_PIN;
+const uint8_t SdChipSelect = SS;
 
 Sd2Card card;
 SdVolume vol;
@@ -121,7 +121,9 @@ void volDmp() {
 //------------------------------------------------------------------------------
 void setup() {
   Serial.begin(9600);
-
+  // wait for Leonardo
+  while(!Serial) {}
+  
   // use uppercase in hex and use 0X base prefix
   cout << uppercase << showbase << endl;
   

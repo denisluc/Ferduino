@@ -30,7 +30,7 @@ void setup() {
   // Initialize SdFat or print a detailed error message and halt
   // Use half speed like the native library.
   // change to SPI_FULL_SPEED for more performance.
-  if (!sd.init(SPI_HALF_SPEED, chipSelect)) sd.initErrorHalt();
+  if (!sd.begin(chipSelect, SPI_HALF_SPEED)) sd.initErrorHalt();
 
   // open the file for write at end like the Native SD library
   if (!myFile.open("test.txt", O_RDWR | O_CREAT | O_AT_END)) {
@@ -52,7 +52,7 @@ void setup() {
 
   // read from the file until there's nothing else in it:
   int data;
-  while ((data = myFile.read()) > 0) Serial.write(data);
+  while ((data = myFile.read()) >= 0) Serial.write(data);
   // close the file:
   myFile.close();
 }

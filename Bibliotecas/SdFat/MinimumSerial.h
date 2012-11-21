@@ -12,31 +12,25 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef SdFatUtil_h
-#define SdFatUtil_h
+#ifndef MinimumSerial_h
+#define MinimumSerial_h
 /**
- * \file
- * \brief Useful utility functions.
+ * \class MinimumSerial
+ * \brief mini serial class for the %SdFat library.
  */
-#include <Arduino.h>
-#include <avr/pgmspace.h>
-/** Store and print a string in flash memory.*/
-#define PgmPrint(x) SerialPrint_P(PSTR(x))
-/** Store and print a string in flash memory followed by a CR/LF.*/
-#define PgmPrintln(x) SerialPrintln_P(PSTR(x))
-
-namespace SdFatUtil {
-  int FreeRam();
-  void print_P(Print* pr, PGM_P str);
-  void println_P(Print* pr, PGM_P str);
-  void SerialPrint_P(PGM_P str);
-  void SerialPrintln_P(PGM_P str);
-}
-
-using namespace SdFatUtil;  // NOLINT
-#endif  // #define SdFatUtil_h
+class MinimumSerial : public Print {
+ public:
+  void begin(unsigned long);
+  int read();
+  size_t write(uint8_t b);
+  using Print::write;
+};
+#ifdef UDR0
+extern MinimumSerial MiniSerial;
+#endif  // UDR0
+#endif  MinimumSerial_h

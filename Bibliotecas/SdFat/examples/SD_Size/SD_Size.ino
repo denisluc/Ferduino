@@ -18,6 +18,7 @@ void setup() {
   file.println("Hello");
 
   file.close();
+  Serial.println("Done");
 }
 //------------------------------------------------------------------------------
 void loop() {}
