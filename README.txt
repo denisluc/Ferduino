@@ -1,4 +1,4 @@
-"Ferduino aquarium controller"
+****Ferduino controlador de aquários****
 
 Este programa é software livre; Você pode redistribuí-lo e/ou modificá-lo sob os termos da GNU (General Public License) como publicada pela Free Software Foundation versão 3 da licença, ou (por sua opção) qualquer versão posterior. Este programa é distribuído na esperança que seja útil, mas sem qualquer garantia; sem mesmo a garantia implícita de comercialização ou propósito particular. Consulte o GNU General Public License para mais detalhes.
 

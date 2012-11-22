@@ -32,16 +32,32 @@ void setup()
   Serial.begin(38400);
   pinMode(multiplexPIN1, OUTPUT);
   pinMode(multiplexPIN2, OUTPUT);
+
+  Open_channel(ph1);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
+  Open_channel(ph2);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
+  Open_channel(orp);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
+  Open_channel(ec);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
 }
 
 void loop() 
 {
-  delay(2000);
   do{
     Open_channel(ph1);
     Serial3.print("r"); //Para se obter um valor compensado pode-se enviar um valor de temperatura da água.
     Serial3.print('\r');
-    delay(1100);
+    delay(500);
 
     if(Serial3.available() > 3) 
     {
@@ -75,7 +91,7 @@ void loop()
     Open_channel(ph2);
     Serial3.print("r"); //Para se obter um valor compensado pode-se enviar um valor de temperatura da água.
     Serial3.print('\r');
-    delay(1100);
+    delay(500);
 
     if(Serial3.available() > 3) 
     {
@@ -109,7 +125,7 @@ void loop()
     Open_channel(orp);
     Serial3.print("r"),
     Serial3.print('\r');
-    delay(1100);
+    delay(500);
 
     if(Serial3.available() > 3) 
     {
@@ -134,7 +150,7 @@ void loop()
     Open_channel(ec);
     Serial3.print("r"); //Para se obter um valor compensado pode-se enviar um valor de temperatura da água.
     Serial3.print('\r');
-    delay(1100);
+    delay(500);
     if(Serial3.available() > 3) 
     {
       Serial.print("Densidade:");
