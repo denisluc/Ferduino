@@ -1,4 +1,4 @@
-﻿// Este programa compatível com a IDE 1.0.2 desde que as biliotecas "WConstants.h" e "wiring.h" ejam colocadas na pasta ...arduino-1.0.2\hardware\arduino\cores\arduino.
+﻿// Este programa compatível com a IDE 1.0.2 desde que as biliotecas "WConstants.h" e "wiring.h" sejam colocadas na pasta ...arduino-1.0.2\hardware\arduino\cores\arduino.
 //Dúvidas, sugestões e elogios: fefegarcia_1@hotmail.com
 //---------------------------------------------------------
 //Ferduino controlador de aquários versão 2.3.9>> Última atualização:25/11/2012.
