@@ -98,14 +98,15 @@ ITDB02_Touch  myTouch(6,5,4,3,2);
 int x, y;                  // touch coordinates
 long previousMillis = 0;
 byte data[56];
-String date; 
+String day; 
 int whiteLed, blueLed;    // previous Led output values
 int dispScreen = 0;
 
 // tela inicio =0, 
 //tela de menu = 1, 
 //tela do relogio = 2,
-// tela de teste = 3,tela controle de temperatua = 4, 
+// tela de teste = 3,
+//tela controle de temperatua = 4, 
 //tela alterar valores dos led = 5
 // tela para alterar potencia dos leds = 6,
 // tela tpa = 7, 
@@ -151,7 +152,7 @@ boolean PHAAflag = 0;          // Sinaliza que o PH do aquario esta fora do espe
 //*****************************************************************************************
 //************************ Variaveis de controle de densidade *****************************
 //*****************************************************************************************
-int DEN = 1025;                  // Densidade
+int DEN = 0;                  // Densidade
 int setDEN = 0;             // Densidade desejada
 int offDEN = 0;             // Variacao permitida da densidade
 int alarmDEN = 0;           // Variacao para acionar o alarme de densidade
@@ -316,6 +317,8 @@ int tpa_status;
 //*****************************************************************************************
 //************************* Funcoes ethernet shield ***************************************
 //*****************************************************************************************
+boolean Ethernet_Shield = true; // Altere para "false" caso não tenha um Ethernet Shield conectado ao Arduino.
+
 #define FEED    "xxxxx"               // Numero do projeto(cosm.com).
 #define APIKEY  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //Senha do projeto(cosm.com)
 #define KEY   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" // supertweet.net: senha criptografada em base 64 (http://tuxgraphics.org/~guido/javascript/base64-javascript.html).
@@ -336,7 +339,6 @@ Stash stash;
 //*****************************************************************************************
 char sensorstring[15];
 byte holding;
-short i;
 int ph1 = 0;
 int ph2 = 1;
 int orp = 2;
@@ -345,10 +347,6 @@ int done = 0;
 float PHT;
 int ORPT;
 int DENT;
-int ja = 0;
-int ka = 0;
-float somaden = 0.0f;
-float valorden = 0.0f;
 unsigned long millis_antes = 0;
 
 //*****************************************************************************************
@@ -1324,7 +1322,7 @@ double MyNormalize(double v)
 byte validateDate(byte d, byte m, word y)
 {
   byte mArr[12] = {
-    31,0,31,30,31,30,31,31,30,31,30,31                              };
+    31,0,31,30,31,30,31,31,30,31,30,31                                      };
   byte od;
 
   if (m==2)
@@ -1364,7 +1362,7 @@ byte validateDate(byte d, byte m, word y)
 byte validateDateForMonth(byte d, byte m, word y)
 {
   byte mArr[12] = {
-    31,0,31,30,31,30,31,31,30,31,30,31                              };
+    31,0,31,30,31,30,31,31,30,31,30,31                                      };
   byte od;
   boolean dc=false;
 
@@ -1402,7 +1400,7 @@ byte calcDOW(byte d, byte m, int y)
 {
   int dow;
   byte mArr[12] = {
-    6,2,2,5,0,3,5,1,4,6,2,4                              };
+    6,2,2,5,0,3,5,1,4,6,2,4                                      };
 
   dow = (y % 100);
   dow = dow*1.25;
@@ -1429,6 +1427,9 @@ void updateStr(int val)
   stCurrent[stCurrentLen]=val;
   stCurrent[stCurrentLen+1]='\0';
   stCurrentLen++;
+  myGLCD.setFont(BigFont);
+  setFont(LARGE, 0, 255, 0, 0, 0, 0);
+  myGLCD.print("*", 110 +((stCurrentLen -1)*16), 210);
 }
 
 //---------------------------------------main screen ----------------------------------------------tela =0
@@ -1436,7 +1437,8 @@ void mainScreen(boolean refreshAll=false)
 {
   int ledLevel, s, u;
   String oldval, rtc1, rtcm;
-  t = rtc.getTime();
+  oldval = day;
+  day = String(t.date);                             //refresh date if different
 
   myGLCD.setColor(64, 64, 64);
   myGLCD.fillRect(0, 226, 400, 239);
@@ -1449,9 +1451,8 @@ void mainScreen(boolean refreshAll=false)
   myGLCD.printNumI(t.year, 225, 227);
   myGLCD.print(rtc.getTimeStr(FORMAT_LONG), 315, 227);  
   setFont(SMALL, 255, 255, 255, 0, 0, 0);
-  oldval = date;                             //refresh date if different
 
-  if ((oldval!=date) || refreshAll)
+  if ((oldval != day) || refreshAll)
   {
     char bufferLP[16];
     LP.toCharArray(bufferLP, 16);
@@ -4186,18 +4187,18 @@ void rever_dosagem_personalizada() // ----------tela =32
 void check_parametros() 
 {
   int i;
-
   unsigned long millis_agora = millis();
 
   if (millis_agora - millis_antes > 60000)
   {   
     millis_antes = millis_agora;        
+
     do{
       Open_channel(ph1);
       Serial3.flush(); 
       Serial3.print(tempC);
       Serial3.print('\r');
-      delay(1100);
+      delay(500);
 
       if(Serial3.available() > 3) 
       {
@@ -4206,7 +4207,6 @@ void check_parametros()
         {
           sensorstring[i]= Serial3.read();
         }  
-        Serial.println();
         if(holding ==5)
         {
           PHT = ((sensorstring[1]-48)*100 + (sensorstring[3]-48)*10 + (sensorstring[4]-48));
@@ -4230,7 +4230,7 @@ void check_parametros()
       Serial3.flush();
       Serial3.print(tempC);
       Serial3.print('\r');
-      delay(1100);
+      delay(500);
 
       if(Serial3.available() > 3) 
       {
@@ -4239,7 +4239,6 @@ void check_parametros()
         {
           sensorstring[i]= Serial3.read();
         }
-        Serial.println();
         if(holding ==5)
         {
           PHT = ((sensorstring[1]-48)*100 + (sensorstring[3]-48)*10 + (sensorstring[4]-48));
@@ -4263,7 +4262,7 @@ void check_parametros()
       Serial3.flush();
       Serial3.print("r"),
       Serial3.print('\r');
-      delay(1100);
+      delay(500);
 
       if(Serial3.available() > 3) 
       {
@@ -4282,28 +4281,28 @@ void check_parametros()
     while (done==1);
     done=0;
 
-    /*  do{
-     Open_channel(ec);
-     Serial3.flush();
-     Serial3.print(tempC);
-     Serial3.print('\r');
-     delay(1100);
-     if(Serial3.available() > 4) 
-     {
-     holding = Serial3.available();
-     for(i=1; i <= 15; i++)
-     {
-     sensorstring[i]= Serial3.read();
-     }
-     DENT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + ((sensorstring[3]-48)*10) + (sensorstring[4]-48));
-     DEN = DENT*0.2;
-     DENT=0;      
-     Serial3.flush();
-     break;
-     }    
-     } 
-     while (done==1);
-     done=0;*/
+    do{
+      Open_channel(ec);
+      Serial3.flush();
+      Serial3.print(tempC);
+      Serial3.print('\r');
+      delay(500);
+      if(Serial3.available() > 4) 
+      {
+        holding = Serial3.available();
+        for(i=1; i <= 15; i++)
+        {
+          sensorstring[i]= Serial3.read();
+        }
+        DENT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + ((sensorstring[3]-48)*10) + (sensorstring[4]-48));
+        DEN = DENT;
+        DENT=0;      
+        Serial3.flush();
+        break;
+      }    
+    } 
+    while (done==1);
+    done=0;
   }
   Serial3.flush();
 }
@@ -8663,11 +8662,14 @@ void processMyTouch()
         waitForIt(boTL[0], boTL[1], boTL[2], boTL[3]);
         for (int i=0; i < 7;i++) stCurrent[i] = '\0';
         stCurrentLen=0;
+        myGLCD.setColor(0, 0, 0);
+        myGLCD.setBackColor(0, 0, 0);
+        myGLCD.print("                                 ", 110, 210);
       }
       if ((x>=boTE[0]) && (x<=boTE[2]) && (y>=boTE[1]) && (y<=boTE[3]))  // Botao: entrar
       {
         waitForIt(boTE[0], boTE[1], boTE[2], boTE[3]);
-        if ((stCurrent[0] == senha [0]) && (stCurrent[1] == senha [1]) && (stCurrent[2] == senha [2]) && (stCurrent[3] == senha [3]) && (stCurrent[4] == senha [4]) && (stCurrent[5] == senha [5]))
+        if ((stCurrent[0] == senha [0]) && (stCurrent[1] == senha [1]) && (stCurrent[2] == senha [2]) && (stCurrent[3] == senha [3]) && (stCurrent[4] == senha [4]) && (stCurrent[5] == senha [5]) && stCurrentLen <=6)
         {
           stCurrentLen=0;
           myGLCD.setFont(BigFont);
@@ -8682,7 +8684,7 @@ void processMyTouch()
           memcpy(stCurrent, limpar_senha, sizeof(limpar_senha));
         }
 
-        else
+        else if(stCurrentLen <=6)
         {
           myGLCD.setFont(BigFont);
           myGLCD.setColor(255, 0, 0);
@@ -8698,6 +8700,32 @@ void processMyTouch()
           myGLCD.print("SENHA INCORRETA!", 35, 192);
           delay(500);
           myGLCD.print("                ", 35, 192);
+          myGLCD.print("                                                ", 110 , 210); //Limpar senha impressa ***************
+          stCurrentLen=0;
+          memcpy(stCurrent, limpar_senha, sizeof(limpar_senha));
+        }
+        else if(stCurrentLen > 6)
+        {
+          myGLCD.setFont(BigFont);
+          myGLCD.setColor(255, 0, 0);
+          myGLCD.setBackColor(0, 0, 0);
+          myGLCD.print("SENHA INCORRETA!", 35, 192);
+          delay(500);
+          myGLCD.print("                 ", 35, 192);
+          delay(500);            
+          myGLCD.print("MAXIMO 6 DIGITOS!", 35, 192);
+          delay(1000);
+          myGLCD.print("                 ", 35, 192);
+          delay(500);
+          myGLCD.print("SENHA INCORRETA!", 35, 192);
+          delay(500);
+          myGLCD.print("                ", 35, 192);
+          delay(500);
+          myGLCD.print("MAXIMO 6 DIGITOS!", 35, 192);
+          delay(1000);
+          myGLCD.print("                 ", 35, 192);
+          delay(500);
+          myGLCD.print("                                               ", 110 , 210); //Limpar senha impressa ***************
           stCurrentLen=0;
           memcpy(stCurrent, limpar_senha, sizeof(limpar_senha));
         }
@@ -9764,12 +9792,15 @@ void setup()
   // set the resolution to 10 bit
   sensors.setResolution(sensor_agua, 10);
   sensors.setResolution(sensor_dissipador, 10);
-  if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) 
-  {
-    Serial.println( "Failed to access Ethernet controller");
-  }
-  ether.staticSetup(myip,gwip);
 
+  if(Ethernet_Shield == true)
+  {
+    if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) 
+    {
+      Serial.println( "Failed to access Ethernet controller");
+    }
+    ether.staticSetup(myip,gwip);
+  }
   // Set the clock to run-mode
   rtc.halt(false);
   min_cnt= (t.hour*60)+t.min;
@@ -9780,34 +9811,52 @@ void setup()
   lerORPEEPROM();
   lerDENEEPROM();
   ler_dosadora_EEPROM();
-  LED_levels_output();
-  mainScreen(true); 
+  LED_levels_output(); 
   card.init(SPI_QUARTER_SPEED,chipselect);
   volume.init(&card);
   root.openRoot(&volume);
-
+  mainScreen(true);
+  Open_channel(ph1);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
+  Open_channel(ph2);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
+  Open_channel(orp);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
+  Open_channel(ec);
+  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print('\r');
+  delay(500);
 }
 //-----------------------main loop------------------------------
 void loop()
 {
-  int valor1=0;
-  int valor2=0;
-  int valor3=0;
-  int valor4=0;
-  int valor5=0;
-  int valor6=0;
-/*
-  valor1 = analogRead(sensor1);
-  valor2 = analogRead(sensor2);
-  valor3 = analogRead(sensor3);
-  valor4 = analogRead(sensor4);
-  valor5 = analogRead(sensor5);
-  valor6 = analogRead(sensor6);*/
+  /*  int valor1=0;
+   int valor2=0;
+   int valor3=0;
+   int valor4=0;
+   int valor5=0;
+   int valor6=0;
+   
+   valor1 = analogRead(sensor1);
+   valor2 = analogRead(sensor2);
+   valor3 = analogRead(sensor3);
+   valor4 = analogRead(sensor4);
+   valor5 = analogRead(sensor5);
+   valor6 = analogRead(sensor6);*/
 
   unsigned long currentMillis = millis();
   unsigned long logtempminutoagora = millis();
 
-  ether.packetLoop(ether.packetReceive());
+  if(Ethernet_Shield == true)
+  {
+    ether.packetLoop(ether.packetReceive());
+  }
 
   if (myTouch.dataAvailable())  
   { 
@@ -9906,7 +9955,11 @@ void loop()
   check_dosagem_automatica_3();
   logorpgraf();
   check_parametros();
-  cosm ();
+  
+  if(Ethernet_Shield == true)
+  {
+    cosm ();
+  }
 
 
   if (logtempminutoagora - logtempminutoantes > 900000ul) //Grava parametros a cada 15 minutos no cartao SD.
