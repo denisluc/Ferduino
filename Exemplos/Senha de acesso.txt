@@ -103,10 +103,40 @@ void updateStr(int val)
 {
   stCurrent[stCurrentLen]=val;
   stCurrent[stCurrentLen+1]='\0';
-  stCurrentLen++;
-  myGLCD.setFont(BigFont);
-  setFont(LARGE, 0, 255, 0, 0, 0, 0);
-  myGLCD.print(stCurrent, 110, 210);
+  if(stCurrentLen <=5)
+  {
+    stCurrentLen++;
+    myGLCD.setFont(BigFont);
+    setFont(LARGE, 0, 255, 0, 0, 0, 0);
+    myGLCD.print(stCurrent, 110, 210);
+  }
+  else
+  {
+    myGLCD.setFont(BigFont);
+    myGLCD.setColor(255, 0, 0);
+    myGLCD.setBackColor(0, 0, 0);
+    myGLCD.print("SENHA INCORRETA!", 35, 192);
+    delay(500);
+    myGLCD.print("                 ", 35, 192);
+    delay(500);            
+    myGLCD.print("MAXIMO 6 DIGITOS!", 35, 192);
+    delay(1000);
+    myGLCD.print("                 ", 35, 192);
+    delay(500);
+    myGLCD.print("SENHA INCORRETA!", 35, 192);
+    delay(500);
+    myGLCD.print("                ", 35, 192);
+    delay(500);
+    myGLCD.print("MAXIMO 6 DIGITOS!", 35, 192);
+    delay(1000);
+    myGLCD.print("                 ", 35, 192);
+    delay(500);
+    stCurrentLen=0;
+    memcpy(stCurrent, limpar_senha, sizeof(limpar_senha));
+    clearScreen();
+    solicitar_senha();
+  }
+
 }
 
 void clearScreen()
@@ -195,11 +225,14 @@ void processMyTouch()
     waitForIt(boTL[0], boTL[1], boTL[2], boTL[3]);
     for (int i=0; i < 7;i++) stCurrent[i] = '\0';
     stCurrentLen=0;
+    myGLCD.setColor(0, 0, 0);
+    myGLCD.setBackColor(0, 0, 0);
+    myGLCD.print("                                 ", 110, 210);
   }
   if ((x>=boTE[0]) && (x<=boTE[2]) && (y>=boTE[1]) && (y<=boTE[3]))  // Botao: entrar
   {
     waitForIt(boTE[0], boTE[1], boTE[2], boTE[3]);
-    if ((stCurrent[0] == senha [0]) && (stCurrent[1] == senha [1]) && (stCurrent[2] == senha [2]) && (stCurrent[3] == senha [3]) && (stCurrent[4] == senha [4]) && (stCurrent[5] == senha [5]))
+    if ((stCurrent[0] == senha [0]) && (stCurrent[1] == senha [1]) && (stCurrent[2] == senha [2]) && (stCurrent[3] == senha [3]) && (stCurrent[4] == senha [4]) && (stCurrent[5] == senha [5]) && (stCurrentLen <=6))
     {
       stCurrentLen=0;
       myGLCD.setFont(BigFont);

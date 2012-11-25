@@ -1,32 +1,13 @@
-﻿//Dúvidas, sugestões e elogios: fefegarcia_1@hotmail.com
-//Link para download da IDE com todas as bibliotecas necessárias.
-//https://skydrive.live.com/redir?resid=4F0958C6A216EC!401
-//Este arquivo deve ser salvo com extensão .ino
-//Na pasta onde estiver este arquivo deve conter o "template": "writeAnything.h"
+﻿// Este programa compatível com a IDE 1.0.2 desde que as biliotecas "WConstants.h" e "wiring.h" ejam colocadas na pasta ...arduino-1.0.2\hardware\arduino\cores\arduino.
+//Dúvidas, sugestões e elogios: fefegarcia_1@hotmail.com
 //---------------------------------------------------------
-//Meu Stilo v 2.3.8 Aquarium Controller>> Última atualização:12/09/2012 às 10:35 pelo horário de Brasília.
+//Ferduino controlador de aquários versão 2.3.9>> Última atualização:25/11/2012.
 //Este programa foi desenvolvido com base na versão Stilo 2.1
 //Disponível nesta página http://code.google.com/p/stilo/ 
 //---------------------------------------------------------
-//Nota das modificações:
-//2.3.1: Concluido o código da tpa automática.
-//2.3.2: Adicionado código para gravação de parâmetros em um txt e gráfico de temperatura.
-// Além disso, o codigo foi ajustado para que os sensores de temperatura ocupem apenas um pino do arduino.
-//2.3.3  Corrigido alguns erros.
-//2.3.4 Corrigido problemas com cartão SD.
-//2.3.5 Adicionado novas funções tais como: grafico de PH do aquario, gráfico de PH do reator de calcio
-// Grafico de densidade, menu de controle de PH do reator de calcio  e ORP, menu de referencia para PH do aquario e densidade.
-//Adicionada condicao para evitar que o aquecedor ou resfriador seja ligado em caso de problema na sonda de temperatura.
-//Simplificação do desenho das malhas dos graficos.
-//Alteração da gravação de dados de temperatura que sao usados para desenhar o grafico.  a temperatura e gravada a cada minuto e o grafico é gerado com a media de 6 em 6 valores.
-//2.3.6 Adicionado integração com o cosm.com e alterado o slot do cartão SD para evitar conflitos com o ethernet shield.
-//2.3.7 Adicionado código para trabalhar com os circuito de PH, ORP e Condutividade da Atlas-Scientific, concluido o código para os 
-// graficos de PH e ORP e alterado o numero dos pino de alguns equipamentos.
-//2.3.8 Corrigido alguns problemas com o controle de temperatura e adicionada funcoes de controle e alerta para o CO2 do reator de calcio e ozonizador.
-//---------------------------------------------------------
 //Algoritmo de controle de LED é baseado em Krusduino de Hugh Dangerfield
 //http://Code.Google.com/p/dangerduino/
-//Algoritmo da fase lunar foi escrito por TheDOdblG, baseado no código de NightAtTheOpera's Lunar Phase 
+//Algoritmo da fase lunar foi escrito por Jamie Jardin vulgo "TheDOdblG", baseado no código de NightAtTheOpera's Lunar Phase 
 //http://www.nano-reef.com/forums/index.php?showtopic=217305
 //-----------------------------------------------------------
 // Este programa é software livre; Você pode redistribuí-lo e/ou
