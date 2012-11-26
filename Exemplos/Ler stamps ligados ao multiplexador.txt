@@ -10,165 +10,398 @@
 const int multiplexPIN1 = A14; // S0
 const int multiplexPIN2 = A15; //S1
 
-char sensorstring[15];
-byte holding;
-short i;
+char inData[150];
+char *inParse[150];
+int index = 0;
+int contador = 0;
+boolean stringComplete = false;
+
+int  int_valor_1 = 0;
+float  float_valor_1 = 0;
+
 short ph1=0; //Y0
 short ph2=1; //Y1
 short orp=2; //Y2
 short ec=3; //Y3
-short done=0;
-float PHT; // PH temporário.
-float PHA;
-float PHR;
-int ORP;
-int ORPT; //ORP temporária
-int DEN;
-int DENT; //Densidade temporária.
+
+int ORP = 0;
+int DEN = 0;
+float PHA = 0.0;
+float PHR = 0.0;
 
 void setup()
-{
+{                                                              
+  Serial.begin(38400);                                                      
   Serial3.begin(38400);
-  Serial.begin(38400);
   pinMode(multiplexPIN1, OUTPUT);
   pinMode(multiplexPIN2, OUTPUT);
 
   Open_channel(ph1);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print("L0");
   Serial3.print('\r');
   delay(500);
+  Serial3.flush();
+  Serial3.print("c");
+  Serial3.print('\r');
+
   Open_channel(ph2);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print("L0");
   Serial3.print('\r');
   delay(500);
+  Serial3.flush();
+  Serial3.print("c");
+  Serial3.print('\r');
+
   Open_channel(orp);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print("L0");
   Serial3.print('\r');
   delay(500);
-  Open_channel(ec);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.flush();
+  Serial3.print("c");
   Serial3.print('\r');
-  delay(500);
+/*    
+   Open_channel(ec);
+   Serial3.print("L0");
+   Serial3.print('\r');
+   delay(500);
+   Serial3.flush();
+   Serial3.print("c");
+   Serial3.print('\r');*/
+}
+long millis_antes = 0;
+
+void loop()
+{ 
+  if((millis() - millis_antes) >= 10000)
+  {
+    millis_antes = millis();
+    check_parametro_ph_aquario();
+    check_parametro_ph_reator();
+    check_parametro_orp(); 
+   // check_parametro_densidade();
+  }
 }
 
-void loop() 
+void check_parametro_ph_aquario()
 {
-  do{
-    Open_channel(ph1);
-    Serial3.print("r"); //Para se obter um valor compensado pode-se enviar um valor de temperatura da água.
-    Serial3.print('\r');
-    delay(500);
+  char *str;    
+  int count = 0;
 
-    if(Serial3.available() > 3) 
+  Serial3.flush();
+
+  Open_channel(ph1);
+  do
+  {
+    if (Serial3.available()>3) 
     {
-      holding = Serial3.available();
-      for(i=1; i <= holding; i++)
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
       {
-        sensorstring[i]= Serial3.read();
+        contador ++;
       }
-      Serial.print("PH do aquario:");
-
-      if(holding ==5)
+      if(contador == 20)
       {
-        PHT = ((sensorstring[1]-48)*100 + (sensorstring[3]-48)*10 + (sensorstring[4]-48));
-        PHA = PHT/100;
+        inData[index] = '\0';
+        contador = 0;  
+        stringComplete = true;
       }
-      else
-      {
-        PHT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + (sensorstring[4]-48)*10 + (sensorstring[5]-48));
-        PHA = PHT/100;
-      }  
-      PHT=0;
-      Serial.println(PHA);
-      Serial3.flush();
-      break;
     }
-  } 
-  while (done==1);
-  done=0;
+  }
+  while(stringComplete == false);
 
-  do{
-    Open_channel(ph2);
-    Serial3.print("r"); //Para se obter um valor compensado pode-se enviar um valor de temperatura da água.
-    Serial3.print('\r');
-    delay(500);
-
-    if(Serial3.available() > 3) 
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
     {
-      holding = Serial3.available();
-      for(i=1; i <= holding; i++)
-      {
-        sensorstring[i]= Serial3.read();
-      }
-      Serial.print("PH do reator:");
-      if(holding ==5)
-      {
-        PHT = ((sensorstring[1]-48)*100 + (sensorstring[3]-48)*10 + (sensorstring[4]-48));
-        PHR = PHT/100;
-      }
-      else
-      {
-        PHT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + (sensorstring[4]-48)*10 + (sensorstring[5]-48));
-        PHR = PHT/100;
-      }  
-      PHT=0;
-      Serial.println(PHR);
-      Serial3.flush();
-      break;
+      inData[i] = ',';
     }
+  }
+  index = 0;
+  char *p = inData;
 
-  } 
-  while (done==1);
-  done=0;
+  if (stringComplete == true) 
+  {
 
-  do{
-    Open_channel(orp);
-    Serial3.print("r"),
-    Serial3.print('\r');
-    delay(500);
-
-    if(Serial3.available() > 3) 
-    {
-      holding = Serial3.available();
-      for(i=1; i <= holding; i++)
-      {
-        sensorstring[i]= Serial3.read();
-      }
-      Serial.print("ORP:");
-      ORPT = ((sensorstring[1]-48)*100 + (sensorstring[2]-48)*10 + (sensorstring[3]-48));
-      ORP = ORPT; 
-      ORPT=0;
-      Serial.println(ORP);
-      Serial3.flush();      
-      break;
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
     }
-  } 
-  while (done==1);
-  done=0;
+    p = NULL;
 
-  do{
-    Open_channel(ec);
-    Serial3.print("r"); //Para se obter um valor compensado pode-se enviar um valor de temperatura da água.
-    Serial3.print('\r');
-    delay(500);
-    if(Serial3.available() > 3) 
+    for(int i= 12;i <=19; i++)
     {
-      Serial.print("Densidade:");
-      holding = Serial3.available();
-      for(i=1; i <= 15; i++)
-      {
-        sensorstring[i]= Serial3.read();
-        Serial.print(sensorstring[i]);
-      }
-      Serial.println();
-      Serial3.flush();
-      break;
-    }  
-  } 
-  while (done==1);
-  done=0;
+      float_valor_1 += atof(inParse[i]);
+    }
+    float_valor_1 /= 8;
 
+    stringComplete = false; 
+    PHA = float_valor_1;
+    Serial.print("PH do aquario:");
+    Serial.println(PHA);
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    float_valor_1 = 0;
+  }
 }
+
+void check_parametro_ph_reator()
+{
+  char *str;    
+  int count = 0;
+
+  Serial3.flush();
+
+  Open_channel(ph2);
+  do
+  {
+    if (Serial3.available()>3) 
+    {
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
+      {
+        contador ++;
+      }
+      if(contador == 20)
+      {
+        inData[index] = '\0';
+        contador = 0;  
+        stringComplete = true;
+      }
+    }
+  }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      float_valor_1 += atof(inParse[i]);
+    }
+    float_valor_1 /= 8;
+
+    stringComplete = false; 
+    PHR = float_valor_1;
+    Serial.print("PH do reator:");
+    Serial.println(PHR); 
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    float_valor_1 = 0;
+  }
+}
+
+void check_parametro_orp()
+{
+  char *str;    
+  int count = 0;
+
+  Serial3.flush();
+
+  Open_channel(orp);
+  do
+  {
+    if (Serial3.available()>3) 
+    {
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
+      {
+        contador ++;
+      }
+      if(contador == 20)
+      {
+        inData[index] = '\0';
+        contador = 0;  
+        stringComplete = true;
+      }
+    }
+  }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      int_valor_1 += atoi(inParse[i]);
+    }
+    int_valor_1 /= 8;
+
+    stringComplete = false; 
+    ORP = int_valor_1;
+    Serial.print("ORP:");
+    Serial.println(ORP); 
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    int_valor_1 = 0;
+  }
+}
+
+void check_parametro_densidade()
+{
+  char *str;    
+  int count = 0;
+
+  Serial3.flush();
+
+  Open_channel(ec);
+  do
+  {
+    if (Serial3.available()>0) 
+    {
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
+      {
+        contador ++;
+      }
+      if(contador == 20)
+      {
+        inData[index] = '\0';
+        contador = 0;  
+        stringComplete = true;
+      }
+    }
+  }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      int_valor_1 += atoi(inParse[i]);
+    }
+    int_valor_1 /= 8;
+
+    stringComplete = false; 
+    DEN = int_valor_1;
+    Serial.print("Densidade");
+    Serial.println(DEN); 
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    int_valor_1 = 0;
+  }
+}
+
 void Open_channel(short channel)
 {
   switch (channel) 
@@ -208,7 +441,5 @@ void Open_channel(short channel)
   Serial3.print('\r');
   return;
 }
-
-
 
 

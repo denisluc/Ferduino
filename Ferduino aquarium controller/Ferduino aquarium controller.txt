@@ -1,7 +1,7 @@
-﻿// Este programa compatível com a IDE 1.0.2 desde que as biliotecas "WConstants.h" e "wiring.h" sejam colocadas na pasta ...arduino-1.0.2\hardware\arduino\cores\arduino.
+﻿// Este programa compatível com a IDE 1.0.2 desde que as bibliotecas "WConstants.h" e "wiring.h" sejam colocadas na pasta ...arduino-1.0.2\hardware\arduino\cores\arduino.
 //Dúvidas, sugestões e elogios: fefegarcia_1@hotmail.com
 //---------------------------------------------------------
-//Ferduino controlador de aquários versão 2.3.9>> Última atualização:25/11/2012.
+//Ferduino controlador de aquários versão 2.4.0>> Última atualização:26/11/2012.
 //Este programa foi desenvolvido com base na versão Stilo 2.1
 //Disponível nesta página http://code.google.com/p/stilo/ 
 //---------------------------------------------------------
@@ -258,7 +258,8 @@ int sexta = 0;
 int sabado = 0;
 int domingo = 0;
 int tpa = 0;                             // Controla od estagio da TPA automatica
-boolean tpa_em_andamento = 0;           // Sinaliza TPA automatica em andamento
+boolean tpa_em_andamento = false;           // Sinaliza TPA automatica em andamento
+boolean falha_tpa = false;           // Sinaliza falha durante a TPA automatica
 unsigned long tempo = 0;                 // Duracao de cada estagio da TPA automatica
 unsigned long marcadoriniciotpa = 0;   // Evita que uma tpa inicie proximo do millis zerar
 unsigned long shiftedmillis = 0;       // Evita que uma tpa inicie proximo do millis zerar
@@ -318,10 +319,11 @@ int tpa_status;
 //************************* Funcoes ethernet shield ***************************************
 //*****************************************************************************************
 boolean Ethernet_Shield = true; // Altere para "false" caso não tenha um Ethernet Shield conectado ao Arduino.
-
+/*
 #define FEED    "xxxxx"               // Numero do projeto(cosm.com).
-#define APIKEY  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //Senha do projeto(cosm.com)
-#define KEY   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" // supertweet.net: senha criptografada em base 64 (http://tuxgraphics.org/~guido/javascript/base64-javascript.html).
+ #define APIKEY  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //Senha do projeto(cosm.com)
+ #define KEY   "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" // supertweet.net: senha criptografada em base 64 (http://tuxgraphics.org/~guido/javascript/base64-javascript.html).
+ */
 
 static byte mymac[] = {
   0x54, 0x55, 0x58, 0x10, 0x00, 0x26}; // Este mac deve ser único na rede.
@@ -331,23 +333,25 @@ static byte gwip[] = {
   192,168,2,1 };
 char website[] PROGMEM = "api.cosm.com";
 char website1[] PROGMEM = "api.supertweet.net";
-byte Ethernet::buffer[1000];
+byte Ethernet::buffer[450];
 Stash stash;
 
 //*****************************************************************************************
 //************************** Variaveis de controle do multiplexador ***********************
 //*****************************************************************************************
-char sensorstring[15];
-byte holding;
-int ph1 = 0;
-int ph2 = 1;
-int orp = 2;
-int ec = 3;
-int done = 0;
-float PHT;
-int ORPT;
-int DENT;
-unsigned long millis_antes = 0;
+boolean Stamps = true; // Altere para "false caso não tenha ao menos um dos circuitos de PH, ORP e EC da Atlas Scientific.
+char inData[150];
+char *inParse[150];
+int index = 0;
+int contador_1 = 0;
+boolean stringComplete = false;
+int  int_valor_1 = 0;
+float  float_valor_1 = 0;
+short ph1=0; //Y0
+short ph2=1; //Y1
+short orp=2; //Y2
+short ec=3; //Y3
+long millis_antes = 0;
 
 //*****************************************************************************************
 //************************** Variaveis da solicitacao de senha ****************************
@@ -1220,6 +1224,30 @@ void printButton_verde(char* text, int x1, int y1, int x2, int y2, boolean setFo
     myGLCD.print(text, fx, fy);
   }
 }
+void printButton_vermelho(char* text, int x1, int y1, int x2, int y2, boolean setFont = false)
+{
+  int stl = strlen(text);
+  int fx, fy;
+
+  myGLCD.setColor(255, 0, 0);
+  myGLCD.fillRoundRect (x1, y1, x2, y2);
+  myGLCD.setColor(255, 255, 255);
+  myGLCD.drawRoundRect (x1, y1, x2, y2);
+
+  myGLCD.setBackColor(255, 0, 0);
+  if (setFont) {
+    myGLCD.setFont(BigFont); 
+    fx = x1+(((x2 - x1+1)-(stl*16))/2);
+    fy = y1+(((y2 - y1+1)-16)/2);
+    myGLCD.print(text, fx, fy);
+  }
+  else {
+    myGLCD.setFont(SmallFont); 
+    fx = x1+(((x2 - x1)-(stl*8))/2);
+    fy = y1+(((y2 - y1-1)-8)/2);
+    myGLCD.print(text, fx, fy);
+  }
+}
 void printHeader(char* headline)
 {
   setFont(SMALL, 255, 255, 0, 255, 255, 0);
@@ -1322,7 +1350,7 @@ double MyNormalize(double v)
 byte validateDate(byte d, byte m, word y)
 {
   byte mArr[12] = {
-    31,0,31,30,31,30,31,31,30,31,30,31                                      };
+    31,0,31,30,31,30,31,31,30,31,30,31                                            };
   byte od;
 
   if (m==2)
@@ -1362,7 +1390,7 @@ byte validateDate(byte d, byte m, word y)
 byte validateDateForMonth(byte d, byte m, word y)
 {
   byte mArr[12] = {
-    31,0,31,30,31,30,31,31,30,31,30,31                                      };
+    31,0,31,30,31,30,31,31,30,31,30,31                                            };
   byte od;
   boolean dc=false;
 
@@ -1400,7 +1428,7 @@ byte calcDOW(byte d, byte m, int y)
 {
   int dow;
   byte mArr[12] = {
-    6,2,2,5,0,3,5,1,4,6,2,4                                      };
+    6,2,2,5,0,3,5,1,4,6,2,4                                            };
 
   dow = (y % 100);
   dow = dow*1.25;
@@ -1562,7 +1590,7 @@ void mainScreen(boolean refreshAll=false)
   myGLCD.fillRect(270, 119, 320, 137);              // Apagar noticia de ozonio ligado/desligado
   myGLCD.fillRect(287, 138, 350, 155);              // Apagar noticia de reposicao ligado/desligado
   myGLCD.fillRect(263, 158, 390, 174);              // Apagar noticia de nivel normal/anormal
-  myGLCD.fillRect(245, 178, 320, 195);              // Apagar noticia de TPA ligado/desligado
+  myGLCD.fillRect(245, 178, 365, 195);              // Apagar noticia de TPA ligado/desligado
 
   setFont(LARGE, 0, 255, 0, 0, 0, 0);  
   myGLCD.printNumF(tempC, 1, 102, 62); // Temperatura da agua
@@ -1612,19 +1640,19 @@ void mainScreen(boolean refreshAll=false)
     setFont(LARGE, 0, 255, 0, 0, 0, 0);
     myGLCD.print("OFF", 270, 119);           // reator desligado
   }
-  if (tpa_em_andamento==true) 
+  if ((tpa_em_andamento==true) && (falha_tpa == false))
   {             
     setFont(LARGE, 0, 255, 0, 0, 0, 0);
     myGLCD.print("ON", 250, 180);           // TPA em andamento
   }
-  else if (tpa_em_andamento==false) 
+  else if ((tpa_em_andamento==false) && (falha_tpa == false))
   {             
     setFont(LARGE, 0, 255, 0, 0, 0, 0);
     myGLCD.print("OFF", 250, 180);           // TPA não esta em andamento
   }
   if (nivel_status==true) {             
     setFont(LARGE, 255, 0, 0, 0, 0, 0);
-    myGLCD.print("BAIXO", 265, 160);           // Nivel baixo em vermelho
+    myGLCD.print("BAIXO!", 265, 160);           // Nivel baixo em vermelho
   }
   else if (nivel_status==false) 
   {             
@@ -1666,6 +1694,11 @@ void mainScreen(boolean refreshAll=false)
   {                                //print alarm
     setFont(LARGE, 255, 0, 0, 0, 0, 0);
     myGLCD.printNumI(DEN, 88, 140);   //PH do reator em vermelho
+  }
+  if (falha_tpa == true)
+  {             
+    setFont(LARGE, 255, 0, 0, 0, 0, 0);
+    myGLCD.print("FALHA!", 250, 180);           // Sinaliza falha durante uma TPA
   }  
 }
 
@@ -1821,15 +1854,13 @@ void testScreen(boolean refreshAll=false)//--------------------------------teste
 
     while (LEDtestTick)               //test LED and speed up time
     {
-      unsigned long currentMillis = millis();
-
       if (myTouch.dataAvailable())  {
         processMyTouch();
       }
 
-      if (currentMillis - previousMillis > 500)    //change time every 0.5s
+      if (millis() - previousMillis > 500)    //change time every 0.5s
       {
-        previousMillis = currentMillis;
+        previousMillis = millis();
 
         min_cnt++;
         int hour = min_cnt/60;
@@ -1993,7 +2024,7 @@ void tpaScreen(boolean refreshAll = false) //-----------------------------------
     temp2sabado = sabado;
     temp2domingo = domingo;
 
-    printHeader("CONF.DIAS E HORARIO PARA TPA AUTOMATICA");
+    printHeader("CONF. DIAS E HORARIO PARA TPA AUTOMATICA");
 
     printButton("+", houU[0], houU[1], houU[2], houU[3], true); //hour up
     printButton("-", houD[0], houD[1], houD[2], houD[3], true); //hour down
@@ -2049,6 +2080,12 @@ void tpaScreen(boolean refreshAll = false) //-----------------------------------
   if (temp2domingo == 7) printButton_verde("DOMINGO", domI[0], domI[1], domI[2], domI[3]); //botao sabado
   else {
     printButton("DOMINGO", domI[0], domI[1], domI[2], domI[3]); //botao sabado
+  }
+  if (falha_tpa == true) {
+    printButton_vermelho("FALHA!!", proX[0], proX[1], proX[2], proX[3]); //Sinaliza que houve uma falha durante a TPA.
+  } 
+  else {
+    printButton("NORMAL", proX[0], proX[1], proX[2], proX[3]); //Sinaliza que a TPA foi realizada normalmente ou não foi realizada.
   }
 
   setFont(LARGE, 255, 255, 255, 0, 0, 0);
@@ -4184,127 +4221,331 @@ void rever_dosagem_personalizada() // ----------tela =32
 
 
 //------------------------------------- Leitura dos stamps
-void check_parametros() 
+void check_parametro_ph_aquario()
 {
-  int i;
-  unsigned long millis_agora = millis();
+  char *str;    
+  int count = 0;
 
-  if (millis_agora - millis_antes > 60000)
-  {   
-    millis_antes = millis_agora;        
+  Open_channel(ph1);
+  do
+  {
+    if (Serial3.available()>3) 
+    {
 
-    do{
-      Open_channel(ph1);
-      Serial3.flush(); 
-      Serial3.print(tempC);
-      Serial3.print('\r');
-      delay(500);
-
-      if(Serial3.available() > 3) 
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
       {
-        holding = Serial3.available();
-        for(i=1; i <= holding; i++)
-        {
-          sensorstring[i]= Serial3.read();
-        }  
-        if(holding ==5)
-        {
-          PHT = ((sensorstring[1]-48)*100 + (sensorstring[3]-48)*10 + (sensorstring[4]-48));
-          PHA = PHT/100;
-        }
-        else
-        {
-          PHT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + (sensorstring[4]-48)*10 + (sensorstring[5]-48));
-          PHA = PHT/100;
-        }  
-        PHT=0;
-        Serial3.flush();
-        break;
+        contador_1 ++;
+        Serial.println(contador_1);
       }
-    } 
-    while (done==1);
-    done=0;
-
-    do{
-      Open_channel(ph2);
-      Serial3.flush();
-      Serial3.print(tempC);
-      Serial3.print('\r');
-      delay(500);
-
-      if(Serial3.available() > 3) 
+      if(contador_1 == 20)
       {
-        holding = Serial3.available();
-        for(i=1; i <= holding; i++)
-        {
-          sensorstring[i]= Serial3.read();
-        }
-        if(holding ==5)
-        {
-          PHT = ((sensorstring[1]-48)*100 + (sensorstring[3]-48)*10 + (sensorstring[4]-48));
-          PHR = PHT/100;
-        }
-        else
-        {
-          PHT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + (sensorstring[4]-48)*10 + (sensorstring[5]-48));
-          PHR = PHT/100;
-        }  
-        PHT=0;
-        Serial3.flush();
-        break;
+        inData[index] = '\0';
+        contador_1 = 0;  
+        stringComplete = true;
       }
-    } 
-    while (done==1);
-    done=0;
-
-    do{
-      Open_channel(orp);
-      Serial3.flush();
-      Serial3.print("r"),
-      Serial3.print('\r');
-      delay(500);
-
-      if(Serial3.available() > 3) 
-      {
-        holding = Serial3.available();
-        for(i=1; i <= holding; i++)
-        {
-          sensorstring[i]= Serial3.read();
-        }
-        ORPT = ((sensorstring[1]-48)*100 + (sensorstring[2]-48)*10 + (sensorstring[3]-48));
-        ORP = ORPT; 
-        ORPT=0;
-        Serial3.flush();      
-        break;
-      }
-    } 
-    while (done==1);
-    done=0;
-
-    do{
-      Open_channel(ec);
-      Serial3.flush();
-      Serial3.print(tempC);
-      Serial3.print('\r');
-      delay(500);
-      if(Serial3.available() > 4) 
-      {
-        holding = Serial3.available();
-        for(i=1; i <= 15; i++)
-        {
-          sensorstring[i]= Serial3.read();
-        }
-        DENT = ((sensorstring[1]-48)*1000 + (sensorstring[2]-48)*100 + ((sensorstring[3]-48)*10) + (sensorstring[4]-48));
-        DEN = DENT;
-        DENT=0;      
-        Serial3.flush();
-        break;
-      }    
-    } 
-    while (done==1);
-    done=0;
+    }
   }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+    Serial.println("string completa");
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      float_valor_1 += atof(inParse[i]);
+    }
+    float_valor_1 /= 8;
+
+    stringComplete = false; 
+    PHA = float_valor_1;
+    Serial.print("PH do aquario:");
+    Serial.println(PHA);
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    Serial.println("millis:");
+    Serial.println(millis());
+    float_valor_1 = 0;
+  }
+}
+
+void check_parametro_ph_reator()
+{
+  char *str;    
+  int count = 0;
+
   Serial3.flush();
+
+  Open_channel(ph2);
+  do
+  {
+    if (Serial3.available()>3) 
+    {
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
+      {
+        contador_1 ++;
+      }
+      if(contador_1 == 20)
+      {
+        inData[index] = '\0';
+        contador_1 = 0;  
+        stringComplete = true;
+      }
+    }
+  }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      float_valor_1 += atof(inParse[i]);
+    }
+    float_valor_1 /= 8;
+
+    stringComplete = false; 
+    PHR = float_valor_1;
+    Serial.print("PH do reator:");
+    Serial.println(PHR); 
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    Serial.println("millis:");
+    Serial.println(millis());
+    float_valor_1 = 0;
+  }
+}
+
+void check_parametro_orp()
+{
+  char *str;    
+  int count = 0;
+
+  Serial3.flush();
+
+  Open_channel(orp);
+  do
+  {
+    if (Serial3.available()>3) 
+    {
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
+      {
+        contador_1 ++;
+      }
+      if(contador_1 == 20)
+      {
+        inData[index] = '\0';
+        contador_1 = 0;  
+        stringComplete = true;
+      }
+    }
+  }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      int_valor_1 += atoi(inParse[i]);
+    }
+    int_valor_1 /= 8;
+
+    stringComplete = false; 
+    ORP = int_valor_1;
+    Serial.print("ORP:");
+    Serial.println(ORP); 
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    Serial.println("millis:");
+    Serial.println(millis());
+    int_valor_1 = 0;
+  }
+}
+
+void check_parametro_densidade() // Este trecho do código precisa de ajuste mas, ainda não tenho as sondas de salinidade.
+{
+  char *str;    
+  int count = 0;
+
+  Serial3.flush();
+
+  Open_channel(ec);
+  do
+  {
+    if (Serial3.available()>0) 
+    {
+      char inChar = Serial3.read(); 
+      inData[index] = inChar; 
+      index++;     
+      if (inChar == '\r') 
+      {
+        contador_1 ++;
+      }
+      if(contador_1 == 20)
+      {
+        inData[index] = '\0';
+        contador_1 = 0;  
+        stringComplete = true;
+      }
+    }
+  }
+  while(stringComplete == false);
+
+  for (int i= 0; i <= index; i++)
+  {
+    if (inData[i] == '\r') 
+    {
+      inData[i] = ',';
+    }
+  }
+  index = 0;
+  char *p = inData;
+
+  if (stringComplete == true) 
+  {
+
+    while ((str = strtok_r(p, ",", &p)) != NULL)
+    {   
+      inParse[count] = str;
+      count++;      
+    }
+    p = NULL;
+
+    for(int i= 12;i <=19; i++)
+    {
+      int_valor_1 += atoi(inParse[i]);
+    }
+    int_valor_1 /= 8;
+
+    stringComplete = false; 
+    DEN = int_valor_1;
+    Serial.print("Densidade");
+    Serial.println(DEN); 
+    Serial.print("[");
+    Serial.print(inParse[12]);
+    Serial.print(", ");
+    Serial.print(inParse[13]);
+    Serial.print(", ");
+    Serial.print(inParse[14]);
+    Serial.print(", ");
+    Serial.print(inParse[15]);
+    Serial.print(", ");
+    Serial.print(inParse[16]);
+    Serial.print(", ");
+    Serial.print(inParse[17]);
+    Serial.print(", ");
+    Serial.print(inParse[18]); 
+    Serial.print(", ");
+    Serial.print(inParse[19]);
+    Serial.println("]");
+    int_valor_1 = 0;
+  }
 }
 
 void Open_channel(short channel)
@@ -4415,7 +4656,7 @@ void checktpa()
   t = rtc.getTime();
   tempo = (duracaomaximatpa * 60000ul);
 
-  if ((segunda==t.dow) && (hora==t.hour) && (minuto==t.min) && (t.sec<=5))
+  if ((segunda==t.dow) && (hora==t.hour) && (minuto==t.min) && (t.sec<=5) && (falha_tpa == false))
   {
     tpa=1;
     if ((4294967295ul - tempo) < millis())
@@ -4570,19 +4811,19 @@ void checktpa()
     digitalWrite(bomba3Pin,LOW);
     tpa_em_andamento = false;
   }
-  else if ((shiftedmillis - marcadoriniciotpa) >= tempo)
+  else if (((shiftedmillis - marcadoriniciotpa) >= tempo) && (tpa_em_andamento == true))
   {
     digitalWrite(bomba1Pin,LOW); //desliga as bombas todas e mete tpa=0 para não entrar no ciclo outra vez
     digitalWrite(bomba2Pin,LOW);
     digitalWrite(bomba3Pin,LOW);
-    tpa_em_andamento = false;
     tpa=0;
+    falha_tpa = true;
   }
 }
 void reposicao_agua_doce () // abre a solenoide 1 se o nível estiver baixo e se a tpa não estiver em andamento
-//e se o chiller estiver desligado e se o nível do sump não estiver anormal.
+//e se o chiller estiver desligado e se o nível do sump não estiver anormal e se não houve falha durante uma tpa.
 {
-  if((analogRead(sensor3) > 400) && (analogRead(sensor2) > 400) && (tpa_em_andamento == false) && (tempCflag==false))
+  if((analogRead(sensor3) > 400) && (analogRead(sensor2) > 400) && (tpa_em_andamento == false) && (tempCflag==false) && (falha_tpa == false))
   {
     digitalWrite(solenoide1Pin,HIGH);
     ato = true; //sinaliza reposição em andamento
@@ -4723,11 +4964,9 @@ void check_dosagem_automatica_3()
   int contador13 = 0;
   int contador23 = 0;
 
-  unsigned long millis_agora_3 = millis();
-
-  if (millis_agora_3 - millis_antes_3 > 60000)
+  if (millis() - millis_antes_3 > 60000)
   {   
-    millis_antes_3 = millis_agora_3;
+    millis_antes_3 = millis();
 
     digitalWrite (4, LOW);
 
@@ -4976,7 +5215,7 @@ void check_status()
   {
     chiller_status = 100;
   }
-  else if (tempCflag==false)
+  else
   {
     chiller_status = 0;
   }
@@ -4985,7 +5224,7 @@ void check_status()
   {
     aquecedor_status = 100;
   }
-  else if (tempHflag==false)
+  else
   {
     aquecedor_status = 0;
   }
@@ -4993,7 +5232,7 @@ void check_status()
   {
     reator_status = 100;
   }
-  else if (PHRflag==false)
+  else
   {
     reator_status =0;
   }
@@ -5001,7 +5240,7 @@ void check_status()
   {
     ozonio_status = 100;
   }
-  else if (ORPflag==false)
+  else
   {
     ozonio_status = 0;
   }
@@ -5009,7 +5248,7 @@ void check_status()
   {
     reposicao_status = 100;
   }
-  else if (ato==false)
+  else
   {
     reposicao_status = 0;
   }
@@ -5017,28 +5256,30 @@ void check_status()
   {
     niveis_status = 100;
   }
-  else if (nivel_status==true)
+  else
   {
     niveis_status = 0;
   }
-  if (tpa_em_andamento==true)
+  if ((tpa_em_andamento==true) && (falha_tpa == false))
   {
     tpa_status = 100;
   }
-  else if (tpa_em_andamento==false)
+  else if ((tpa_em_andamento==false) && (falha_tpa == false))
   {
     tpa_status = 0;
+  }
+  else if ((falha_tpa == true) && (tpa_em_andamento==true))
+  {
+    tpa_status = - 50;
   }
 }
 
 void cosm () //--------------- Envia dados para o cosm.com ------------------------------------
 {
 
-  unsigned long current_Millis = millis();
-
-  if (current_Millis - previous_Millis > 60000)    //Envia dados a cada 90s
+  if (millis() - previous_Millis > 60000)    //Envia dados a cada 90s
   {
-    previous_Millis = current_Millis;
+    previous_Millis = millis();
 
     ether.dnsLookup(website);
 
@@ -5193,7 +5434,7 @@ void check_ORP()
 }
 void check_alarme()
 {
-  if ((PHRAflag == true) || (tempAflag == true) || (PHAAflag == true) || (DENAflag == true) || (ORPAflag == true))
+  if ((PHRAflag == true) || (tempAflag == true) || (PHAAflag == true) || (DENAflag == true) || (ORPAflag == true) || (falha_tpa == true))
   {
     digitalWrite (alarmPin, HIGH);
   }
@@ -5202,30 +5443,6 @@ void check_alarme()
     digitalWrite (alarmPin, LOW);
   }
 }
-static void sendToTwitter () {
-  // generate two fake values as payload - by using a separate stash,
-  // we can determine the size of the generated message ahead of time
-  ether.dnsLookup(website1);
-  byte sd = stash.create();
-  stash.println("status=@Fernando_GSouza >>>Hello!");
-  stash.save();
-
-  // generate the header with payload - note that the stash size is used,
-  // and that a "stash descriptor" is passed in as argument using "$H"
-  Stash::prepare(PSTR("POST /1/statuses/update.xml HTTP/1.1" "\r\n"
-    "Host: $F" "\r\n"
-    "Authorization: Basic $F" "\r\n"
-    "User-Agent: Arduino EtherCard lib" "\r\n"                        
-    "Content-Length: $D" "\r\n"
-    "Content-Type: application/x-www-form-urlencoded" "\r\n"
-    "\r\n"
-    "$H"),
-  website1, PSTR(KEY), stash.size(), sd);
-
-  // send the packet - this also releases all stash buffers once done
-  ether.tcpSend();
-}
-
 
 //-------------------------------------------Touch screen----------------------------
 void processMyTouch()
@@ -6031,6 +6248,21 @@ void processMyTouch()
           tpaScreen();
         }
       }
+      if ((x >= proX[0]) && (x <= proX[2]) && (y >= proX[1]) && (y <= proX[3])) 
+      {
+        if (falha_tpa == true)
+        {
+          falha_tpa = false;
+          tpa_em_andamento = false;
+          tpaScreen();
+        }
+        else
+        {
+          falha_tpa = true;
+          tpaScreen();
+        }
+      }
+
       break;
     case 8: //--------------------------------------------- Escolher dosadora -----------------------------------
 
@@ -9817,21 +10049,58 @@ void setup()
   root.openRoot(&volume);
   mainScreen(true);
   Open_channel(ph1);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Open_channel(ph1);
+  Serial3.print("e");
   Serial3.print('\r');
   delay(500);
+  Serial3.flush();
+  Serial3.print("l0");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
+  Serial3.print("c");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
   Open_channel(ph2);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print("e");
   Serial3.print('\r');
   delay(500);
+  Serial3.flush();
+  Serial3.print("l0");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
+  Serial3.print("c");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
   Open_channel(orp);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print("e");
   Serial3.print('\r');
   delay(500);
+  Serial3.flush();
+  Serial3.print("l0");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
+  Serial3.print("c");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
   Open_channel(ec);
-  Serial3.print("l0"); // Desliga o led do stamp. Altere para "L1" para ligar o led do stamp.
+  Serial3.print("e");
   Serial3.print('\r');
   delay(500);
+  Serial3.flush();
+  Serial3.print("l0");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
+  Serial3.print("c");
+  Serial3.print('\r');
+  delay(500);
+  Serial3.flush();
 }
 //-----------------------main loop------------------------------
 void loop()
@@ -9850,9 +10119,6 @@ void loop()
    valor5 = analogRead(sensor5);
    valor6 = analogRead(sensor6);*/
 
-  unsigned long currentMillis = millis();
-  unsigned long logtempminutoagora = millis();
-
   if(Ethernet_Shield == true)
   {
     ether.packetLoop(ether.packetReceive());
@@ -9863,9 +10129,21 @@ void loop()
     processMyTouch(); 
   }
 
-  if (currentMillis - previousMillis > 10000)    //check time, temp and LED levels every 10s
+  if((millis() - millis_antes) >= 60000)
   {
-    previousMillis = currentMillis;  
+    millis_antes = millis();
+    if(Stamps == true)
+    {
+      check_parametro_ph_aquario();
+      check_parametro_ph_reator();
+      check_parametro_orp(); 
+     // check_parametro_densidade();
+    }
+  }
+
+  if (millis() - previousMillis > 10000)    //check time, temp and LED levels every 10s
+  {
+    previousMillis = millis();  
     t = rtc.getTime();
     checkTempC();
     min_cnt= (t.hour*60)+t.hour;
@@ -9882,16 +10160,16 @@ void loop()
     {
       mainScreen();    
     }
-
-    /*    Serial.println("Dia da semana");  
+    /*
+     Serial.println("Dia da semana");  
      Serial.println(rtc.getDOWStr()); 
      
      Serial.println("Horario");
      Serial.println(rtc.getTimeStr(FORMAT_LONG));
-     
+   
      Serial.println ("Memoria livre:");
      Serial.println (FreeRam());
-     
+      
      Serial.println("Sensor 1:");    
      Serial.println(valor1);
      
@@ -9954,17 +10232,16 @@ void loop()
   logdengraf();
   check_dosagem_automatica_3();
   logorpgraf();
-  check_parametros();
-  
+
   if(Ethernet_Shield == true)
   {
     cosm ();
   }
 
 
-  if (logtempminutoagora - logtempminutoantes > 900000ul) //Grava parametros a cada 15 minutos no cartao SD.
+  if (millis() - logtempminutoantes > 900000ul) //Grava parametros a cada 15 minutos no cartao SD.
   {
-    logtempminutoantes=logtempminutoagora;
+    logtempminutoantes = millis();
     logparametros();
   }
 
