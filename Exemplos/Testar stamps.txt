@@ -1,0 +1,114 @@
+//Este programa serve para testar a ligação dos "stamps" ligados a um multiplexador.
+// Altera a configuração da porta serial da IDE para "carriage return".
+
+String inputstring = "";                                                       
+String sensorstring = "";                                                      
+boolean input_stringcomplete = false;                                        
+boolean sensor_stringcomplete = false;                                      
+const int multiplexadorS0Pin = A14; // S0
+const int multiplexadorS1Pin = A15; //S1
+int index = 0;
+char inData[2];
+
+void setup()
+{                                                        
+  Serial.begin(38400);                                              
+  Serial3.begin(38400);                                               
+  inputstring.reserve(5);                                                
+  sensorstring.reserve(30);                                              
+  pinMode(multiplexadorS0Pin, OUTPUT);
+  pinMode(multiplexadorS1Pin, OUTPUT);
+  
+  Serial.println("Para enviar comando ao stamp de PH do aquario digite: y0");
+  
+  Serial.println("Para enviar comando ao stamp de PH do reator digite: y1");
+ 
+  Serial.println("Para enviar comando ao stamp de ORP digite: y2");
+  
+  Serial.println("Para enviar comando ao stamp de salinidade (condutividade) digite: y3");
+  
+  Serial.println("Para limpar o canal aberto digite: 00");
+}
+
+
+
+void serialEvent() {                                                        
+  char inchar = (char)Serial.read();                           
+  inputstring += inchar;                                      
+  inData[index] = inchar; 
+  index++;  
+
+  if((inData[0] == 'y') && (inData[1] == '0')) 
+  {
+    digitalWrite(multiplexadorS0Pin, LOW);
+    digitalWrite(multiplexadorS1Pin, LOW);
+    Serial.println("Canal do PH aquario aberto.");
+    inData[0] = '9';
+    inData[1] = '9';
+  }
+  if((inData[0] == 'y') && (inData[1] == '1'))
+  {
+    digitalWrite(multiplexadorS0Pin, HIGH);
+    digitalWrite(multiplexadorS1Pin, LOW);
+    Serial.println("Canal do PH reator aberto.");
+    inData[0] = '9';
+    inData[1] = '9';
+  }
+  if((inData[0] == 'y') && (inData[1] == '2'))
+  {
+    digitalWrite(multiplexadorS0Pin, LOW);
+    digitalWrite(multiplexadorS1Pin, HIGH);
+    Serial.println("Canal do ORP aberto.");
+    inData[0] = '9';
+    inData[1] = '9';
+  }
+  if((inData[0] == 'y') && (inData[1] == '3'))
+  {
+    digitalWrite(multiplexadorS0Pin, HIGH);
+    digitalWrite(multiplexadorS1Pin, HIGH);
+    Serial.println("Canal da salinidade (condutividade) aberto.");
+    inData[0] = '9';
+    inData[1] = '9';
+  }
+   if((inData[0] == '0') && (inData[1] == '0'))
+  {
+    Serial3.flush();
+    Serial.println("Limpo.");
+    inData[0] = '9';
+    inData[1] = '9';
+  } 
+  if(inchar == '\r') 
+  {
+    input_stringcomplete = true;
+  }                
+}  
+
+
+
+void loop(){                                                                   
+
+  if (input_stringcomplete){                                                   
+    Serial3.print(inputstring);                                            
+    inputstring = "";                                                        
+    input_stringcomplete = false;                                                                         
+    index = 0;
+
+  }
+
+
+  while (Serial3.available()) {                                              
+    char inchar = (char)Serial3.read();                                 
+    sensorstring += inchar;                                              
+    if (inchar == '\r') {
+      sensor_stringcomplete = true;
+    }                   
+  }
+
+
+  if (sensor_stringcomplete){                                                 
+    Serial.print(sensorstring);                                             
+    sensorstring = "";    
+    sensor_stringcomplete = false;                                          
+    Serial.println("");
+  }
+}
