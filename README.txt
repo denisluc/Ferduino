@@ -4,7 +4,7 @@ Este programa é software livre; Você pode redistribuí-lo e/ou modificá-lo sob os
 
 Funções implementadas até o momento.
 
-Controle para duas cores de "LEDs" independentes; Controle de temperatura; Controle de PH; Controle de ORP; Mensuração de densidade; Trocas de água automática; Controle de reposição de água; Gráfico de PH; Gráfico de ORP; Armazenamento de parâmetros no cartão SD; Envio de dados para o cosm.com; Dosagem automática de elementos químicos (parcialmente concluída).
+Controle para duas cores de "LEDs" independentes; Controle de temperatura; Controle de PH; Controle de ORP; Mensuração de densidade; Trocas de água automática; Controle de reposição de água; Gráfico de PH; Gráfico de ORP; Armazenamento de parâmetros no cartão SD; Envio de dados para o cosm.com; Dosagem automática de elementos químicos.
 
 Em breve:
 
